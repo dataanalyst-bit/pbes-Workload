@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pallavi Boduppal Education Society · Workload Analytics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg-1:#eaf1ff; --bg-2:#f3f7ff; --bg-3:#ffffff;
+  --mesh-a:rgba(59,130,246,.28); --mesh-b:rgba(14,165,233,.22); --mesh-c:rgba(99,102,241,.20);
+  --card:rgba(255,255,255,.72); --card-solid:#ffffff; --card-brd:rgba(255,255,255,.85);
+  --card-shadow:0 10px 30px -12px rgba(30,58,138,.28), 0 2px 6px -2px rgba(30,58,138,.10);
+  --ink:#0f1b3d; --ink-2:#41507a; --ink-3:#7885ad; --line:rgba(20,40,90,.10);
+  --brand:#2563eb; --brand-2:#0ea5e9; --brand-3:#4f46e5; --brand-ink:#1e3a8a;
+  --grad:linear-gradient(135deg,#2563eb 0%,#0ea5e9 55%,#4f46e5 100%);
+  --grad-soft:linear-gradient(135deg,rgba(37,99,235,.12),rgba(14,165,233,.12));
+  --ok:#16a34a; --ok-bg:rgba(22,163,74,.12);
+  --warn:#f59e0b; --warn-bg:rgba(245,158,11,.14);
+  --hot:#ef4444; --hot-bg:rgba(239,68,68,.12);
+  --cool:#0284c7; --cool-bg:rgba(2,132,199,.12);
+  --topbar:rgba(255,255,255,.62);
+  --chip:rgba(255,255,255,.6); --chip-brd:rgba(30,58,138,.14);
+  --scroll:rgba(37,99,235,.35);
+}
+[data-theme="dark"]{
+  --bg-1:#070b1a; --bg-2:#0a1024; --bg-3:#0b1226;
+  --mesh-a:rgba(37,99,235,.30); --mesh-b:rgba(14,165,233,.20); --mesh-c:rgba(79,70,229,.28);
+  --card:rgba(20,30,58,.55); --card-solid:#101a34; --card-brd:rgba(120,150,220,.14);
+  --card-shadow:0 18px 40px -18px rgba(0,0,0,.7), 0 2px 8px -2px rgba(0,0,0,.5);
+  --ink:#eaf0ff; --ink-2:#a9b7e0; --ink-3:#6d7bab; --line:rgba(150,175,235,.12);
+  --brand:#60a5fa; --brand-2:#38bdf8; --brand-3:#818cf8; --brand-ink:#bfd4ff;
+  --grad:linear-gradient(135deg,#3b82f6 0%,#0ea5e9 55%,#6366f1 100%);
+  --grad-soft:linear-gradient(135deg,rgba(59,130,246,.16),rgba(99,102,241,.16));
+  --topbar:rgba(10,16,36,.6);
+  --chip:rgba(30,42,78,.6); --chip-brd:rgba(120,150,220,.18);
+  --scroll:rgba(96,165,250,.4);
+  --ok-bg:rgba(22,163,74,.18); --warn-bg:rgba(245,158,11,.18); --hot-bg:rgba(239,68,68,.18); --cool-bg:rgba(2,132,199,.2);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Inter',system-ui,sans-serif;color:var(--ink);
+  background:var(--bg-1);min-height:100vh;overflow-x:hidden;
+  transition:background .5s ease,color .35s ease;
+  -webkit-font-smoothing:antialiased;
+}
+body::before{
+  content:"";position:fixed;inset:-20%;z-index:-2;
+  background:
+    radial-gradient(45% 40% at 12% 10%,var(--mesh-a),transparent 60%),
+    radial-gradient(40% 45% at 88% 6%,var(--mesh-b),transparent 60%),
+    radial-gradient(50% 50% at 75% 85%,var(--mesh-c),transparent 60%),
+    radial-gradient(45% 45% at 20% 92%,var(--mesh-b),transparent 60%);
+  filter:saturate(1.05);animation:drift 22s ease-in-out infinite alternate;
+}
+body::after{content:"";position:fixed;inset:0;z-index:-1;background:linear-gradient(180deg,transparent,var(--bg-2) 90%);opacity:.6}
+@keyframes drift{0%{transform:translate3d(0,0,0) scale(1)}100%{transform:translate3d(0,-3%,0) scale(1.08)}}
+::selection{background:rgba(37,99,235,.24)}
+::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-thumb{background:var(--scroll);border-radius:20px;border:2px solid transparent;background-clip:content-box}
+.msym{font-family:'Material Symbols Rounded';font-weight:400;font-style:normal;line-height:1;vertical-align:middle;-webkit-font-feature-settings:'liga';font-feature-settings:'liga'}
+
+/* ---------- layout ---------- */
+.wrap{max-width:1480px;margin:0 auto;padding:0 clamp(14px,3vw,34px) 60px}
+.topbar{
+  position:sticky;top:0;z-index:60;margin:0 -100vw;padding:14px 100vw 14px;
+  background:var(--topbar);backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px) saturate(1.4);
+  border-bottom:1px solid var(--line);
+}
+.topbar-in{max-width:1480px;margin:0 auto;display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:0 clamp(14px,3vw,34px)}
+.brand{display:flex;align-items:center;gap:13px;margin-right:auto}
+.logo{width:46px;height:46px;border-radius:14px;background:var(--grad);display:grid;place-items:center;color:#fff;box-shadow:0 8px 20px -6px rgba(37,99,235,.6);position:relative;overflow:hidden;flex:none}
+.logo .msym{font-size:26px}
+.logo::after{content:"";position:absolute;inset:0;background:linear-gradient(120deg,transparent 40%,rgba(255,255,255,.45) 50%,transparent 60%);transform:translateX(-120%);animation:sheen 5s ease-in-out infinite}
+@keyframes sheen{0%,70%{transform:translateX(-120%)}85%,100%{transform:translateX(120%)}}
+.brand h1{font-family:'Manrope';font-weight:800;font-size:19px;letter-spacing:-.4px;line-height:1.05}
+.brand p{font-size:11.5px;color:var(--ink-3);font-weight:500;letter-spacing:.2px;margin-top:1px}
+.tb-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.theme-toggle{width:auto;height:42px;padding:0 8px 0 14px;border-radius:24px;border:1px solid var(--chip-brd);background:var(--chip);color:var(--ink-2);
+  display:flex;align-items:center;gap:8px;cursor:pointer;font:inherit;font-weight:600;font-size:12.5px;transition:.25s;backdrop-filter:blur(6px)}
+.theme-toggle:hover{border-color:var(--brand);color:var(--brand)}
+.theme-toggle .knob{width:26px;height:26px;border-radius:50%;background:var(--grad);display:grid;place-items:center;color:#fff}
+.theme-toggle .knob .msym{font-size:17px}
+.btn-ghost{height:42px;padding:0 16px;border-radius:24px;border:1px solid var(--chip-brd);background:var(--chip);color:var(--ink-2);
+  display:flex;align-items:center;gap:7px;cursor:pointer;font:inherit;font-weight:600;font-size:12.5px;transition:.25s}
+.btn-ghost:hover{border-color:var(--brand);color:var(--brand)}
+.btn-ghost .msym{font-size:19px}
+
+/* ---------- hero / filters ---------- */
+.hero{padding:30px 0 12px}
+.eyebrow{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--brand);
+  background:var(--grad-soft);border:1px solid var(--chip-brd);padding:6px 13px;border-radius:20px}
+.eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--brand);box-shadow:0 0 0 4px rgba(37,99,235,.18);animation:pulse 2s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 8px rgba(37,99,235,0)}}
+.hero h2{font-family:'Manrope';font-weight:800;font-size:clamp(26px,4vw,42px);letter-spacing:-1.2px;margin:16px 0 8px;line-height:1.03}
+.hero h2 .grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero .sub{color:var(--ink-2);font-size:15px;max-width:640px;line-height:1.55}
+
+.filters{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px;align-items:center}
+.field{position:relative;display:flex;align-items:center}
+.field .msym{position:absolute;left:13px;font-size:19px;color:var(--ink-3);pointer-events:none}
+select,.search input{
+  height:46px;border-radius:14px;border:1px solid var(--card-brd);background:var(--card);backdrop-filter:blur(10px);
+  color:var(--ink);font:inherit;font-weight:600;font-size:13.5px;padding:0 40px 0 42px;cursor:pointer;transition:.2s;
+  box-shadow:var(--card-shadow);appearance:none;min-width:190px}
+select:hover,.search input:hover{border-color:var(--brand)}
+select:focus,.search input:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 4px rgba(37,99,235,.16)}
+.field::after{content:"expand_more";font-family:'Material Symbols Rounded';position:absolute;right:12px;color:var(--ink-3);pointer-events:none;font-size:20px}
+.search::after{display:none}
+.search input{cursor:text;min-width:230px;padding-right:16px}
+.reset{height:46px;width:46px;border-radius:14px;border:1px solid var(--card-brd);background:var(--card);color:var(--ink-2);cursor:pointer;display:grid;place-items:center;transition:.2s;box-shadow:var(--card-shadow)}
+.reset:hover{color:var(--hot);border-color:var(--hot)}
+.reset .msym{font-size:21px}
+
+/* ---------- KPI ---------- */
+.section-h{display:flex;align-items:center;gap:10px;margin:34px 2px 16px}
+.section-h .bar{width:4px;height:20px;border-radius:4px;background:var(--grad)}
+.section-h h3{font-family:'Manrope';font-weight:700;font-size:16px;letter-spacing:-.2px}
+.section-h span{font-size:12.5px;color:var(--ink-3);font-weight:500}
+
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:14px}
+.kpi{position:relative;background:var(--card);border:1px solid var(--card-brd);border-radius:20px;padding:18px 18px 16px;
+  box-shadow:var(--card-shadow);backdrop-filter:blur(14px);overflow:hidden;transition:transform .3s cubic-bezier(.2,.8,.2,1),box-shadow .3s;
+  opacity:0;transform:translateY(14px)}
+.kpi.in{opacity:1;transform:none}
+.kpi:hover{transform:translateY(-5px)}
+.kpi:hover{box-shadow:0 20px 44px -16px rgba(37,99,235,.4)}
+.kpi .top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+.kpi .ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;color:#fff;box-shadow:0 8px 18px -6px rgba(0,0,0,.25)}
+.kpi .ic .msym{font-size:22px}
+.kpi .trend{font-size:11px;font-weight:700;padding:4px 8px;border-radius:20px;display:flex;align-items:center;gap:2px}
+.kpi .trend .msym{font-size:14px}
+.kpi .val{font-family:'Manrope';font-weight:800;font-size:30px;letter-spacing:-1px;line-height:1;font-variant-numeric:tabular-nums}
+.kpi .lbl{font-size:12.5px;color:var(--ink-2);font-weight:600;margin-top:6px}
+.kpi .spark{position:absolute;right:0;bottom:0;left:0;height:36px;opacity:.5}
+.g-blue{background:var(--grad)} .g-cyan{background:linear-gradient(135deg,#06b6d4,#0ea5e9)}
+.g-indigo{background:linear-gradient(135deg,#6366f1,#8b5cf6)} .g-green{background:linear-gradient(135deg,#10b981,#22c55e)}
+.g-amber{background:linear-gradient(135deg,#f59e0b,#f97316)} .g-rose{background:linear-gradient(135deg,#f43f5e,#ef4444)}
+
+/* ---------- grid + cards ---------- */
+.grid{display:grid;gap:16px}
+.g-2{grid-template-columns:1.5fr 1fr}
+.g-3{grid-template-columns:repeat(3,1fr)}
+.g-2b{grid-template-columns:1fr 1.4fr}
+.card{background:var(--card);border:1px solid var(--card-brd);border-radius:22px;padding:20px 20px 18px;box-shadow:var(--card-shadow);
+  backdrop-filter:blur(14px);opacity:0;transform:translateY(16px);transition:opacity .6s,transform .6s}
+.card.in{opacity:1;transform:none}
+.card-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;gap:10px}
+.card-h .ttl{display:flex;align-items:center;gap:9px}
+.card-h .ttl .ic{width:34px;height:34px;border-radius:10px;background:var(--grad-soft);display:grid;place-items:center;color:var(--brand)}
+.card-h .ttl .ic .msym{font-size:19px}
+.card-h h4{font-family:'Manrope';font-weight:700;font-size:15px;letter-spacing:-.2px}
+.card-h .hint{font-size:11.5px;color:var(--ink-3);font-weight:500}
+.card-sub{font-size:12px;color:var(--ink-3);margin:-2px 0 14px 43px;font-weight:500}
+.chart-box{position:relative;width:100%}
+.h-260{height:260px}.h-300{height:300px}.h-330{height:330px}.h-360{height:360px}
+
+/* legend chips */
+.legend{display:flex;flex-wrap:wrap;gap:8px 14px;margin-top:14px}
+.legend .li{display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:var(--ink-2)}
+.legend .sw{width:11px;height:11px;border-radius:4px}
+
+/* ---------- insights ---------- */
+.insight-list{display:flex;flex-direction:column;gap:12px}
+.insight{display:flex;gap:13px;padding:13px 14px;border-radius:15px;background:var(--grad-soft);border:1px solid var(--chip-brd);align-items:flex-start}
+.insight .ic{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;color:#fff;flex:none}
+.insight .ic .msym{font-size:19px}
+.insight b{font-family:'Manrope';font-size:13.5px;font-weight:700;display:block;margin-bottom:2px}
+.insight p{font-size:12.5px;color:var(--ink-2);line-height:1.5}
+.insight strong{color:var(--brand-ink);font-weight:700}
+
+/* ---------- table ---------- */
+.tbl-tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.tbl-tools .search input{height:42px;box-shadow:none;min-width:210px}
+.tbl-tools .field .msym{font-size:18px}
+.count-pill{margin-left:auto;font-size:12px;font-weight:700;color:var(--brand);background:var(--grad-soft);border:1px solid var(--chip-brd);padding:8px 13px;border-radius:20px}
+.tbl-scroll{overflow-x:auto;border-radius:14px;border:1px solid var(--line)}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:640px}
+thead th{position:sticky;top:0;background:var(--card-solid);text-align:left;font-family:'Manrope';font-weight:700;font-size:11.5px;
+  letter-spacing:.4px;text-transform:uppercase;color:var(--ink-3);padding:13px 14px;cursor:pointer;user-select:none;white-space:nowrap;border-bottom:1px solid var(--line);transition:color .2s}
+thead th:hover{color:var(--brand)}
+thead th .msym{font-size:15px;opacity:.5;vertical-align:-3px}
+tbody td{padding:12px 14px;border-bottom:1px solid var(--line);color:var(--ink-2);font-weight:500}
+tbody tr{transition:background .15s}
+tbody tr:hover{background:var(--grad-soft)}
+tbody td.name{color:var(--ink);font-weight:600;font-family:'Manrope'}
+.tag{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:8px;font-size:11px;font-weight:700;white-space:nowrap}
+.tag .msym{font-size:13px}
+.tag.camp{background:var(--grad-soft);color:var(--brand)}
+.tag.role{background:var(--cool-bg);color:var(--cool)}
+.tag.cur-cbse{background:rgba(37,99,235,.14);color:#2563eb}
+.tag.cur-camb{background:rgba(14,165,233,.16);color:#0284c7}
+.tag.cur-shared{background:rgba(139,92,246,.16);color:#7c3aed}
+[data-theme="dark"] .tag.cur-cbse{color:#93b4ff} [data-theme="dark"] .tag.cur-camb{color:#5cc6f5} [data-theme="dark"] .tag.cur-shared{color:#c4b5fd}
+.wbar{display:flex;align-items:center;gap:9px;min-width:120px}
+.wbar .track{flex:1;height:7px;border-radius:6px;background:var(--line);overflow:hidden}
+.wbar .fill{height:100%;border-radius:6px}
+.wbar b{font-family:'Manrope';font-weight:700;font-size:13px;min-width:22px;text-align:right;font-variant-numeric:tabular-nums}
+.band{display:inline-block;padding:3px 9px;border-radius:20px;font-size:10.5px;font-weight:700;white-space:nowrap}
+.b-under{background:var(--cool-bg);color:var(--cool)} .b-bal{background:var(--ok-bg);color:var(--ok)}
+.b-full{background:var(--warn-bg);color:var(--warn)} .b-over{background:var(--hot-bg);color:var(--hot)}
+.pager{display:flex;justify-content:center;align-items:center;gap:6px;margin-top:16px;flex-wrap:wrap}
+.pager button{min-width:38px;height:38px;padding:0 12px;border-radius:11px;border:1px solid var(--card-brd);background:var(--card);color:var(--ink-2);font:inherit;font-weight:700;font-size:13px;cursor:pointer;transition:.2s}
+.pager button:hover:not(:disabled){border-color:var(--brand);color:var(--brand)}
+.pager button.active{background:var(--grad);color:#fff;border-color:transparent}
+.pager button:disabled{opacity:.4;cursor:not-allowed}
+
+/* ranking lists */
+.rank{display:flex;flex-direction:column;gap:9px}
+.rank .row{display:flex;align-items:center;gap:12px}
+.rank .pos{width:24px;font-family:'Manrope';font-weight:800;font-size:13px;color:var(--ink-3);text-align:center;flex:none}
+.rank .row:nth-child(1) .pos{color:var(--brand)}
+.rank .info{flex:1;min-width:0}
+.rank .info .n{font-size:13px;font-weight:600;font-family:'Manrope';white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rank .info .m{font-size:11px;color:var(--ink-3);font-weight:500;margin-top:1px}
+.rank .track{width:34%;min-width:70px;height:8px;border-radius:6px;background:var(--line);overflow:hidden;flex:none}
+.rank .track i{display:block;height:100%;border-radius:6px;background:var(--grad)}
+.rank .v{font-family:'Manrope';font-weight:800;font-size:15px;min-width:34px;text-align:right;flex:none;font-variant-numeric:tabular-nums}
+
+/* footer */
+.foot{margin-top:44px;padding-top:22px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;color:var(--ink-3);font-size:12px;font-weight:500}
+.foot .badge{display:inline-flex;align-items:center;gap:6px}
+.foot .badge .msym{font-size:16px;color:var(--brand)}
+
+.reveal{opacity:0;transform:translateY(18px)}
+.reveal.in{opacity:1;transform:none;transition:opacity .6s ease,transform .6s cubic-bezier(.2,.8,.2,1)}
+
+@media (max-width:1120px){.kpis{grid-template-columns:repeat(3,1fr)}.g-2,.g-2b,.g-3{grid-template-columns:1fr}}
+@media (max-width:640px){
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .brand p{display:none}.hero h2{letter-spacing:-.6px}
+  .filters .field,.filters .search{flex:1 1 100%}
+  select,.search input{min-width:0;width:100%}
+  .count-pill{margin-left:0}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.kpi,.card,.reveal{opacity:1!important;transform:none!important}}
+
+/* ---------- click-to-view affordances ---------- */
+.viewhint{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;color:var(--brand);
+  background:var(--grad-soft);border:1px solid var(--chip-brd);padding:4px 9px;border-radius:20px;white-space:nowrap}
+.viewhint .msym{font-size:14px}
+.card.clickable .chart-box{cursor:pointer}
+.kpi{cursor:pointer}
+.kpi::after{content:"touch_app";font-family:'Material Symbols Rounded';position:absolute;top:14px;right:14px;font-size:16px;color:var(--brand);opacity:0;transition:opacity .2s}
+.kpi:hover::after{opacity:.55}
+.rank .row{cursor:pointer;border-radius:10px;padding:4px 6px;margin:0 -6px;transition:background .15s}
+.rank .row:hover{background:var(--grad-soft)}
+
+/* ---------- CBSE vs Cambridge scorecard ---------- */
+.scorecard{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.scol{text-align:left;font:inherit;color:var(--ink);background:var(--grad-soft);border:1px solid var(--chip-brd);border-radius:16px;padding:14px;cursor:pointer;transition:.2s;border-top:3px solid var(--c)}
+button.scol:hover{transform:translateY(-3px);box-shadow:0 14px 30px -16px rgba(37,99,235,.45);border-color:var(--c)}
+.sc-head{display:flex;align-items:center;justify-content:space-between;font-family:'Manrope';font-weight:800;font-size:14px;color:var(--c)}
+.sc-head .msym{font-size:18px;opacity:.7}
+.sc-big{font-family:'Manrope';font-weight:800;font-size:30px;letter-spacing:-1px;line-height:1;margin:10px 0 12px}
+.sc-big small{display:block;font-size:11px;font-weight:600;color:var(--ink-3);letter-spacing:0;margin-top:3px}
+.sc-rows{display:flex;flex-direction:column;gap:7px}
+.sc-rows>div{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;color:var(--ink-2);font-weight:500;padding-top:7px;border-top:1px solid var(--line)}
+.sc-rows b{font-family:'Manrope';font-weight:800;font-size:14px;color:var(--ink)}
+.sc-rows b.hot{color:var(--hot)} .sc-rows b.cool{color:var(--cool)}
+.sc-empty{font-size:12.5px;color:var(--ink-3);margin-top:10px}
+
+/* ---------- drill-down modal ---------- */
+.modal-back{position:fixed;inset:0;z-index:200;background:rgba(10,18,40,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .28s}
+.modal-back.open{opacity:1;pointer-events:auto}
+@media(min-width:720px){.modal-back{align-items:center;padding:24px}}
+.modal{width:min(920px,100%);max-height:88vh;display:flex;flex-direction:column;background:var(--card-solid);border:1px solid var(--card-brd);
+  border-radius:22px 22px 0 0;box-shadow:0 -20px 60px -20px rgba(10,18,40,.6);transform:translateY(30px);transition:transform .3s cubic-bezier(.2,.8,.2,1);overflow:hidden}
+@media(min-width:720px){.modal{border-radius:22px}}
+.modal-back.open .modal{transform:none}
+.modal-h{display:flex;align-items:flex-start;gap:12px;padding:20px 22px 16px;border-bottom:1px solid var(--line)}
+.modal-h .m-ic{width:42px;height:42px;border-radius:12px;background:var(--grad);display:grid;place-items:center;color:#fff;flex:none}
+.modal-h .m-ic .msym{font-size:23px}
+.modal-h h3{font-family:'Manrope';font-weight:800;font-size:18px;letter-spacing:-.3px;line-height:1.15}
+.modal-h p{font-size:12.5px;color:var(--ink-3);font-weight:500;margin-top:2px}
+.modal-h .m-close{margin-left:auto;width:38px;height:38px;flex:none;border-radius:11px;border:1px solid var(--card-brd);background:var(--card);color:var(--ink-2);cursor:pointer;display:grid;place-items:center;transition:.2s}
+.modal-h .m-close:hover{color:var(--hot);border-color:var(--hot)}
+.modal-stats{display:flex;flex-wrap:wrap;gap:8px;padding:14px 22px;border-bottom:1px solid var(--line)}
+.mstat{display:flex;flex-direction:column;gap:1px;background:var(--grad-soft);border:1px solid var(--chip-brd);border-radius:12px;padding:8px 13px}
+.mstat b{font-family:'Manrope';font-weight:800;font-size:17px;font-variant-numeric:tabular-nums}
+.mstat span{font-size:10.5px;color:var(--ink-3);font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+.modal-body{overflow:auto;padding:6px 22px 22px}
+.modal-body table{min-width:520px}
+.modal-body thead th{background:var(--card-solid)}
+.modal-empty{padding:40px;text-align:center;color:var(--ink-3);font-size:13.5px}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brand">
+      <div class="logo"><span class="msym">insights</span></div>
+      <div>
+        <h1>Pallavi Boduppal Education Society</h1>
+        <p>Faculty Workload Analytics · 5 Branches</p>
+      </div>
+    </div>
+    <div class="tb-actions">
+      <button class="btn-ghost" id="printBtn"><span class="msym">picture_as_pdf</span>Export</button>
+      <button class="theme-toggle" id="themeBtn">
+        <span class="knob"><span class="msym" id="themeIcon">dark_mode</span></span>
+        <span id="themeLabel">Dark</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <section class="hero">
+    <span class="eyebrow"><span class="dot"></span>Live Faculty Workload Intelligence</span>
+    <h2>Teaching load across every branch,<br><span class="grad">balanced at a glance.</span></h2>
+    <p class="sub">A unified view of periods, departments, curriculum and roles across all five branches — spot overloaded staff, uncover under-utilized capacity, and keep every branch in balance.</p>
+
+    <div class="filters">
+      <div class="field"><span class="msym">apartment</span><select id="fCampus"><option value="">All Branch</option></select></div>
+      <div class="field"><span class="msym">school</span><select id="fCurriculum"><option value="">All Curriculum</option></select></div>
+      <div class="field"><span class="msym">menu_book</span><select id="fSubject"><option value="">All Departments</option></select></div>
+      <div class="field"><span class="msym">badge</span><select id="fRole"><option value="">All Roles</option></select></div>
+      <div class="field"><span class="msym">tune</span><select id="fBand"><option value="">All Workload Bands</option></select></div>
+      <div class="search field"><span class="msym">search</span><input id="fSearch" type="text" placeholder="Search teacher…"></div>
+      <button class="reset" id="resetBtn" title="Reset filters"><span class="msym">restart_alt</span></button>
+    </div>
+  </section>
+
+  <div class="section-h"><span class="bar"></span><h3>Key Metrics</h3><span id="kpiScope">· whole organisation</span></div>
+  <div class="kpis" id="kpis"></div>
+
+  <div class="section-h"><span class="bar"></span><h3>Distribution & Balance</h3><span>· how the load is spread</span></div>
+  <div class="grid g-2">
+    <div class="card reveal clickable">
+      <div class="card-h"><div class="ttl"><div class="ic"><span class="msym">bar_chart</span></div><h4>Faculty &amp; Average Load by Branch</h4></div><span class="hint">bars = teachers · line = avg periods <span class="viewhint"><span class="msym">touch_app</span>click to view</span></span></div>
+      <div class="card-sub">Where the headcount sits, and how hard each branch is working.</div>
+      <div class="chart-box h-330"><canvas id="campusChart"></canvas></div>
+    </div>
+    <div class="card reveal clickable">
+      <div class="card-h"><div class="ttl"><div class="ic"><span class="msym">donut_large</span></div><h4>Workload Bands</h4></div><span class="viewhint"><span class="msym">touch_app</span>click to view</span></div>
+      <div class="card-sub">Every teacher sorted into a capacity zone.</div>
+      <div class="chart-box h-260"><canvas id="bandChart"></canvas></div>
+      <div class="legend" id="bandLegend"></div>
+    </div>
+  </div>
+
+  <div class="grid g-3" style="margin-top:16px">
+    <div class="card reveal clickable">
+      <div class="card-h"><div class="ttl"><div class="ic"><span class="msym">library_books</span></div><h4>Load by Department</h4></div><span class="viewhint"><span class="msym">touch_app</span>click to view</span></div>
+      <div class="card-sub">Total periods each subject carries.</div>
+      <div class="chart-box h-360"><canvas id="subjectChart"></canvas></div>
+    </div>
+    <div class="card reveal clickable">
+      <div class="card-h"><div class="ttl"><div class="ic"><span class="msym">groups</span></div><h4>Staff by Role</h4></div><span class="viewhint"><span class="msym">touch_app</span>click to view</span></div>
+      <div class="card-sub">Composition of the teaching team.</div>
+      <div class="chart-box h-300"><canvas id="roleChart"></canvas></div>
+      <div class="legend" id="roleLegend"></div>
+    </div>
+    <div class="card reveal clickable" data-drill="branchHealth">
+      <div class="card-h"><div class="ttl"><div class="ic"><span class="msym">health_and_safety</span></div><h4>Branch Workload Health</h4></div><span class="viewhint"><span class="msym">touch_app</span>click to view</span></div>
+      <div class="card-sub">Share of each branch that is under-used, balanced, full or overloaded.</div>
+      <div class="chart-box h-300"><canvas id="branchHealthChart"></canvas></div>
+      <div class="legend" id="branchHealthLegend"></div>
+    </div>
+  </div>
+
+  <div class="section-h"><span class="bar"></span><h3>Spotlight & Insights</h3><span>· auto-generated from the current view</span></div>
+  <div class="grid g-3">
+    <div class="card reveal clickable">
+      <div class="card-h"><div class="ttl"><div class="ic"><span class="msym">trending_up</span></div><h4>Highest Load</h4></div><span class="viewhint"><span class="msym">touch_app</span>click to view</span></div>
+      <div class="card-sub">Teachers carrying the most periods.</div>
+      <div class="rank" id="topRank"></div>
+    </div>
+    <div class="card reveal">
+      <div class="card-h"><div class="ttl"><div class="ic"><span class="msym">compare_arrows</span></div><h4>CBSE vs Cambridge</h4></div><span class="viewhint"><span class="msym">touch_app</span>click a side</span></div>
+      <div class="card-sub">How the two curricula compare on load and overload.</div>
+      <div class="scorecard" id="curScore"></div>
+    </div>
+    <div class="card reveal">
+      <div class="card-h"><div class="ttl"><div class="ic"><span class="msym">auto_awesome</span></div><h4>Smart Insights</h4></div></div>
+      <div class="card-sub">What the numbers are telling you.</div>
+      <div class="insight-list" id="insights"></div>
+    </div>
+  </div>
+
+  <div class="section-h"><span class="bar"></span><h3>Faculty Register</h3><span>· click any header to sort</span></div>
+  <div class="card reveal">
+    <div class="tbl-tools">
+      <div class="search field"><span class="msym">search</span><input id="tSearch" type="text" placeholder="Filter this table…"></div>
+      <span class="count-pill" id="tCount">0 records</span>
+    </div>
+    <div class="tbl-scroll">
+      <table id="tbl">
+        <thead><tr>
+          <th data-k="teacher">Teacher <span class="msym sort-ic">unfold_more</span></th>
+          <th data-k="branch">Branch <span class="msym sort-ic">unfold_more</span></th>
+          <th data-k="curriculum">Curriculum <span class="msym sort-ic">unfold_more</span></th>
+          <th data-k="subject">Department <span class="msym sort-ic">unfold_more</span></th>
+          <th data-k="role">Role <span class="msym sort-ic">unfold_more</span></th>
+          <th data-k="workload">Periods <span class="msym sort-ic">unfold_more</span></th>
+          <th data-k="band">Band <span class="msym sort-ic">unfold_more</span></th>
+        </tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div class="pager" id="pager"></div>
+  </div>
+
+  <footer class="foot">
+    <div class="badge"><span class="msym">verified</span>Pallavi Boduppal Education Society · faculty workload planning across 5 branches</div>
+    <div id="footStamp"></div>
+  </footer>
+
+</div>
+
+<div class="modal-back" id="drillBack">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="drillTitle">
+    <div class="modal-h">
+      <div class="m-ic"><span class="msym">table_rows</span></div>
+      <div><h3 id="drillTitle">Details</h3><p id="drillSub"></p></div>
+      <button class="m-close" id="drillClose" aria-label="Close"><span class="msym">close</span></button>
+    </div>
+    <div class="modal-stats" id="drillStats"></div>
+    <div class="modal-body">
+      <div class="tbl-scroll">
+        <table>
+          <thead><tr><th>Teacher</th><th>Branch</th><th>Curriculum</th><th>Department</th><th>Role</th><th>Periods</th><th>Band</th></tr></thead>
+          <tbody id="drillBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============ DATA (embedded) ============ */
+const RAW = [{"campus": "Boduppal", "subject": "Mathematics", "teacher": "Mr. Teeda Narayana Rao", "role": "HOD", "workload": 25.0, "board": "CBSE", "dept_raw": "Maths", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Mathematics", "teacher": "Mr. T Naga Venkata Rajesh", "role": "TGT", "workload": 33.0, "board": "CBSE", "dept_raw": "Maths", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Mathematics", "teacher": "Mr. Seshu", "role": "TGT", "workload": 33.0, "board": "CBSE", "dept_raw": "Maths", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Mathematics", "teacher": "Ms. Irfan Fathima", "role": "TGT", "workload": 28.0, "board": "CBSE", "dept_raw": "Maths", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Mathematics", "teacher": "Ms. Hafiza Begum", "role": "TGT", "workload": 33.0, "board": "CBSE", "dept_raw": "Maths", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Mathematics", "teacher": "Ms. Kadari Paramjyothi", "role": "TGT", "workload": 32.0, "board": "CBSE", "dept_raw": "Maths", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Mathematics", "teacher": "Ms. Lolla Renuka Tejaswini", "role": "TGT", "workload": 32.0, "board": "CBSE", "dept_raw": "Maths", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Mathematics", "teacher": "Ms. K HARITHA", "role": "TGT", "workload": 31.0, "board": "CBSE", "dept_raw": "Maths", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Mathematics", "teacher": "Ms. Voligonda Maheshwari", "role": "TGT", "workload": 31.0, "board": "CBSE", "dept_raw": "Maths", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Mathematics", "teacher": "Ms. R SUJATHA VARMA", "role": "TGT", "workload": 30.0, "board": "CBSE", "dept_raw": "Maths", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Mathematics", "teacher": "Ms. SHAILAJA ANANTOJU", "role": "TGT", "workload": 31.0, "board": "CBSE", "dept_raw": "Maths", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Mathematics", "teacher": "Ms. SWATHI SINGARAPU", "role": "TGT", "workload": 32.0, "board": "CBSE", "dept_raw": "Maths", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Mathematics", "teacher": "Ms. SVS DEEPIKA JAYATHI", "role": "PRT", "workload": 30.0, "board": "CBSE", "dept_raw": "Maths", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Mathematics", "teacher": "Ms. SUJATHA SANTOSH MUKPOGLE", "role": "Coordinator", "workload": 10.0, "board": "CBSE", "dept_raw": "Maths", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Mathematics", "teacher": "Ms. Utagi Radhika", "role": "PRT", "workload": 32.0, "board": "CBSE", "dept_raw": "Maths", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Mathematics", "teacher": "Ms. Avula Kalpana", "role": "PRT", "workload": 34.0, "board": "CBSE", "dept_raw": "Maths", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Mathematics", "teacher": "Ms. R S KAVYA", "role": "PRT", "workload": 34.0, "board": "CBSE", "dept_raw": "Maths", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Mathematics", "teacher": "Ms. Gudikandhula Sai Prasanna", "role": "PRT", "workload": 33.0, "board": "CBSE", "dept_raw": "Maths", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Mathematics", "teacher": "Ms. Gurijala Swathi", "role": "PRT", "workload": 34.0, "board": "CBSE", "dept_raw": "Maths", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Mathematics", "teacher": "Ms. B Ashwini", "role": "PRT", "workload": 30.0, "board": "CBSE", "dept_raw": "Maths", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Mathematics", "teacher": "Ms. Sunandha", "role": "Teacher", "workload": 8.0, "board": "CBSE", "dept_raw": "Maths", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Science", "teacher": "Mr. KANDALA SRIDHAR BABU", "role": "VP", "workload": 12.0, "board": "CBSE", "dept_raw": "Science", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Science", "teacher": "Ms. Gowlikar Archana Bai", "role": "HOD", "workload": 25.0, "board": "CBSE", "dept_raw": "Science", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Science", "teacher": "Ms. Nisha Banoth", "role": "HM", "workload": 12.0, "board": "CBSE", "dept_raw": "Science", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Science", "teacher": "Ms. K Aruna Kumari", "role": "PRT", "workload": 35.0, "board": "CBSE", "dept_raw": "Science", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Science", "teacher": "Ms. Nareddy Dharani Reddy", "role": "PRT", "workload": 36.0, "board": "CBSE", "dept_raw": "Science", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Science", "teacher": "Ms. Shantha Racheal Alfred", "role": "PRT", "workload": 36.0, "board": "CBSE", "dept_raw": "Science", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Science", "teacher": "Ms Likitha", "role": "Teacher", "workload": 36.0, "board": "CBSE", "dept_raw": "Science", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Science", "teacher": "Ms. Gujjula Swathi", "role": "PRT", "workload": 33.0, "board": "CBSE", "dept_raw": "Science", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Science", "teacher": "Ms. Namani Sandhya Rani", "role": "TGT", "workload": 30.0, "board": "CBSE", "dept_raw": "Science", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Science", "teacher": "Ms. Brundavanam Harika", "role": "TGT", "workload": 32.0, "board": "CBSE", "dept_raw": "Science", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Science", "teacher": "Ms. Chenna Ranjitha", "role": "TGT", "workload": 33.0, "board": "CBSE", "dept_raw": "Science", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Science", "teacher": "Ms. B R PRAVEENA", "role": "TGT", "workload": 33.0, "board": "CBSE", "dept_raw": "Science", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Science", "teacher": "Ms. Sandhya Rekulapally", "role": "TGT", "workload": 33.0, "board": "CBSE", "dept_raw": "Science", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Science", "teacher": "Ms. Koluguri Geetha", "role": "TGT", "workload": 32.0, "board": "CBSE", "dept_raw": "Science", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Science", "teacher": "Ms. N MANASA", "role": "TGT", "workload": 33.0, "board": "CBSE", "dept_raw": "Science", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Science", "teacher": "Ms. Laxmi Kameshwari", "role": "TGT", "workload": 32.0, "board": "CBSE", "dept_raw": "Science", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Science", "teacher": "Ms. P Samatha", "role": "TGT", "workload": 32.0, "board": "CBSE", "dept_raw": "Science", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "English", "teacher": "Ms. Pushpa Badam", "role": "HOD", "workload": 29.0, "board": "CBSE", "dept_raw": "English", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "English", "teacher": "Mr. Kurumatla Lawrence", "role": "TGT", "workload": 35.0, "board": "CBSE", "dept_raw": "English", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "English", "teacher": "Ms. Tiyasha", "role": "TGT", "workload": 32.0, "board": "CBSE", "dept_raw": "English", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "English", "teacher": "Mr. Kandula Prabhakar Rao", "role": "TGT", "workload": 30.0, "board": "CBSE", "dept_raw": "English", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "English", "teacher": "Mr. Kummari Raju", "role": "TGT", "workload": 33.0, "board": "CBSE", "dept_raw": "English", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "English", "teacher": "Ms. Sumedha P V V N", "role": "TGT", "workload": 31.0, "board": "CBSE", "dept_raw": "English", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "English", "teacher": "Ms. Priyanka", "role": "TGT", "workload": 31.0, "board": "CBSE", "dept_raw": "English", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "English", "teacher": "Ms. SRIRAMULA SARITHA", "role": "TGT", "workload": 31.0, "board": "CBSE", "dept_raw": "English", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "English", "teacher": "Ms. Kasarla Srinidhi", "role": "PRT", "workload": 34.0, "board": "CBSE", "dept_raw": "English", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "English", "teacher": "Ms. Manasi Jain", "role": "PRT", "workload": 32.0, "board": "CBSE", "dept_raw": "English", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "English", "teacher": "Ms Vadrevu Manasa Srisesha Purna Vaishnavi", "role": "PRT", "workload": 30.0, "board": "CBSE", "dept_raw": "English", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "English", "teacher": "Ms. Pathan Jainab", "role": "PRT", "workload": 36.0, "board": "CBSE", "dept_raw": "English", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "English", "teacher": "Ms. GOPALAPURAPU HIMABINDU", "role": "PRT", "workload": 32.0, "board": "CBSE", "dept_raw": "English", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "English", "teacher": "Ms. Pinky Vaishnav", "role": "PRT", "workload": 33.0, "board": "CBSE", "dept_raw": "English", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "English", "teacher": "Ms. Pooja", "role": "PRT", "workload": 34.0, "board": "CBSE", "dept_raw": "English", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Science", "teacher": "Ms.Vanaparthi Veera Laxmi", "role": "HOD", "workload": 29.0, "board": "CBSE", "dept_raw": "Social Science", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Science", "teacher": "Ms. Maryala Navitha", "role": "TGT", "workload": 35.0, "board": "CBSE", "dept_raw": "Social Science", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Science", "teacher": "Ms. Gandham Padmalatha", "role": "TGT", "workload": 32.0, "board": "CBSE", "dept_raw": "Social Science", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Science", "teacher": "Ms. P R Sirisha Naidu", "role": "TGT", "workload": 31.0, "board": "CBSE", "dept_raw": "Social Science", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Science", "teacher": "Mr. B Srikanth", "role": "TGT", "workload": 32.0, "board": "CBSE", "dept_raw": "Social Science", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Science", "teacher": "Ms. Renuka", "role": "TGT", "workload": 32.0, "board": "CBSE", "dept_raw": "Social Science", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Science", "teacher": "Ms. Pinky", "role": "TGT", "workload": 32.0, "board": "CBSE", "dept_raw": "Social Science", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Science", "teacher": "Ms. Cholleti Bharathi", "role": "TGT", "workload": 30.0, "board": "CBSE", "dept_raw": "Social Science", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Science", "teacher": "Ms. R AKHILA", "role": "PRT", "workload": 29.0, "board": "CBSE", "dept_raw": "Social Science", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Science", "teacher": "Ms. Thota Madhavi", "role": "PRT", "workload": 29.0, "board": "CBSE", "dept_raw": "Social Science", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Science", "teacher": "Ms. GOURI SWAIN", "role": "PRT", "workload": 30.0, "board": "CBSE", "dept_raw": "Social Science", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Science", "teacher": "Ms. VIDHI BHATNAGAR", "role": "Coordinator", "workload": 11.0, "board": "CBSE", "dept_raw": "Social Science", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Telugu", "teacher": "Ms. Nidiganti Haritha", "role": "HOD", "workload": 18.0, "board": "CBSE", "dept_raw": "Telugu", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Telugu", "teacher": "Ms. VELAPATI RAJITHA", "role": "TGT", "workload": 31.0, "board": "CBSE", "dept_raw": "Telugu", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Telugu", "teacher": "Ms. Swathi Nandireddy", "role": "PRT", "workload": 33.0, "board": "CBSE", "dept_raw": "Telugu", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Telugu", "teacher": "Ms. K Vijitha", "role": "PRT", "workload": 35.0, "board": "CBSE", "dept_raw": "Telugu", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Telugu", "teacher": "Mr. Ganesh", "role": "TGT", "workload": 30.0, "board": "CBSE", "dept_raw": "Telugu", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Telugu", "teacher": "Mr. Bachalikura Ashok", "role": "TGT", "workload": 26.0, "board": "CBSE", "dept_raw": "Telugu", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Telugu", "teacher": "Ms.Dandeboina Manjula", "role": "PRT", "workload": 33.0, "board": "CBSE", "dept_raw": "Telugu", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Telugu", "teacher": "Ms. AMANAGANTI SARITHA", "role": "TGT", "workload": 29.0, "board": "CBSE", "dept_raw": "Telugu", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Telugu", "teacher": "Ms. M SUSAN", "role": "TGT", "workload": 29.0, "board": "CBSE", "dept_raw": "Telugu", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Telugu", "teacher": "Ms. KALYANI MAMILAPALLI", "role": "TGT", "workload": 28.0, "board": "CBSE", "dept_raw": "Telugu", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Telugu", "teacher": "Ms. G SHOBHA RANI", "role": "TGT", "workload": 35.0, "board": "CBSE", "dept_raw": "Telugu", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Telugu", "teacher": "Ms. Kapudasi Sudharani", "role": "PRT", "workload": 34.0, "board": "CBSE", "dept_raw": "Telugu", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Telugu", "teacher": "Ms. Madaanu Anitha", "role": "PRT", "workload": 32.0, "board": "CBSE", "dept_raw": "Telugu", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Telugu", "teacher": "Ms. Vadlakonda Thirumala", "role": "PRT", "workload": 30.0, "board": "CBSE", "dept_raw": "Telugu", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Telugu", "teacher": "Ms. PRIYANKA", "role": "PRT", "workload": 28.0, "board": "CBSE", "dept_raw": "Telugu", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Telugu", "teacher": "Ms. Mounika Nanacharla", "role": "PRT", "workload": 28.0, "board": "CBSE", "dept_raw": "Telugu", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Telugu", "teacher": "Ms. Sangars Latha Devi", "role": "PRT", "workload": 20.0, "board": "CBSE", "dept_raw": "Telugu", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "ICT / Computing", "teacher": "Ms. THANDU MADHURI", "role": "HOD", "workload": 25.0, "board": "CBSE", "dept_raw": "ICT", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "ICT / Computing", "teacher": "Mr. Pathak Abhishek", "role": "TGT", "workload": 25.0, "board": "CBSE", "dept_raw": "ICT", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "ICT / Computing", "teacher": "Ms. GARA ISRAEL SRIVANI", "role": "TGT", "workload": 28.0, "board": "CBSE", "dept_raw": "ICT", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "ICT / Computing", "teacher": "Ms. Bavandla Sowmya", "role": "PRT", "workload": 30.0, "board": "CBSE", "dept_raw": "ICT", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "ICT / Computing", "teacher": "Ms. C RAJANI", "role": "PRT", "workload": 28.0, "board": "CBSE", "dept_raw": "ICT", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "ICT / Computing", "teacher": "Ms. Sandhya Rani Kakarla", "role": "PRT", "workload": 29.0, "board": "CBSE", "dept_raw": "ICT", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "ICT / Computing", "teacher": "Ms. Bavandla Sowmya", "role": "PRT", "workload": 30.0, "board": "CBSE", "dept_raw": "ICT", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "ICT / Computing", "teacher": "Ms. Jyothirmai Bangaru", "role": "PRT", "workload": 31.0, "board": "CBSE", "dept_raw": "ICT", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Hindi", "teacher": "Ms. H VANI THAKUR", "role": "HOD", "workload": 19.0, "board": "CBSE", "dept_raw": "Hindi", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Hindi", "teacher": "Ms. Uma Sable", "role": "TGT", "workload": 37.0, "board": "CBSE", "dept_raw": "Hindi", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Hindi", "teacher": "Ms. Rajni Mital", "role": "PRT", "workload": 32.0, "board": "CBSE", "dept_raw": "Hindi", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Hindi", "teacher": "Ms. NEETU", "role": "TGT", "workload": 32.0, "board": "CBSE", "dept_raw": "Hindi", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Hindi", "teacher": "Ms. Monika Ghosh", "role": "TGT", "workload": 29.0, "board": "CBSE", "dept_raw": "Hindi", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Hindi", "teacher": "Ms. Gadepalli Shreedevi HIND", "role": "PRT", "workload": 33.0, "board": "CBSE", "dept_raw": "Hindi", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Hindi", "teacher": "Ms. Munde Archana HIND", "role": "PRT", "workload": 33.0, "board": "CBSE", "dept_raw": "Hindi", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Hindi", "teacher": "Ms. Shaik Shamima HIND", "role": "PRT", "workload": 32.0, "board": "CBSE", "dept_raw": "Hindi", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Hindi", "teacher": "Ms. Lakshmi Vaishnavi", "role": "PRT", "workload": 26.0, "board": "CBSE", "dept_raw": "Hindi", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Hindi", "teacher": "Ms. R Uma", "role": "TGT", "workload": 32.0, "board": "CBSE", "dept_raw": "Hindi", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Hindi", "teacher": "Ms. Komal Rani HIND", "role": "PRT", "workload": 34.0, "board": "CBSE", "dept_raw": "Hindi", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Other", "teacher": "Surender", "role": "Teacher", "workload": 28.0, "board": "CBSE", "dept_raw": "Activity", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Other", "teacher": "Padma", "role": "Teacher", "workload": 27.0, "board": "CBSE", "dept_raw": "Activity", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Other", "teacher": "Prudhvi", "role": "Teacher", "workload": 28.0, "board": "CBSE", "dept_raw": "Activity", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Other", "teacher": "G Mahesh", "role": "Teacher", "workload": 27.0, "board": "CBSE", "dept_raw": "Activity", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Other", "teacher": "Ms. Kadakanchi mounika", "role": "Teacher", "workload": 27.0, "board": "CBSE", "dept_raw": "Activity", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Other", "teacher": "Mr. Mohammad Ismail", "role": "Teacher", "workload": 25.0, "board": "CBSE", "dept_raw": "Activity", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Other", "teacher": "Mr Hussain", "role": "Teacher", "workload": 26.0, "board": "CBSE", "dept_raw": "Activity", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Other", "teacher": "Mr Faiyaz", "role": "Teacher", "workload": 26.0, "board": "CBSE", "dept_raw": "Activity", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Other", "teacher": "Mahesh K", "role": "Teacher", "workload": 28.0, "board": "CBSE", "dept_raw": "Activity", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Arts", "teacher": "Poonam", "role": "Teacher", "workload": 29.0, "board": "CBSE", "dept_raw": "Art & Carft", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Arts", "teacher": "Bhavani", "role": "Teacher", "workload": 27.0, "board": "CBSE", "dept_raw": "Art & Carft", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Arts", "teacher": "Manasree", "role": "Teacher", "workload": 30.0, "board": "CBSE", "dept_raw": "Art & Carft", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Music", "teacher": "Mr. Sudharshan", "role": "Teacher", "workload": 18.0, "board": "CBSE", "dept_raw": "Music", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Music", "teacher": "Ms. Sharan devi", "role": "Teacher", "workload": 17.0, "board": "CBSE", "dept_raw": "Music", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Dance", "teacher": "Mr. Kabothu Rishwanth Kumar", "role": "Teacher", "workload": 24.0, "board": "CBSE", "dept_raw": "Dance", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Dance", "teacher": "Mr. Supraja", "role": "Teacher", "workload": 23.0, "board": "CBSE", "dept_raw": "Dance", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Library", "teacher": "Ms Mounika", "role": "Teacher", "workload": 29.0, "board": "CBSE", "dept_raw": "Library", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Library", "teacher": "Ms Savitha", "role": "Teacher", "workload": 26.0, "board": "CBSE", "dept_raw": "Library", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Physical Education & Sports", "teacher": "Ms Padma", "role": "Teacher", "workload": 26.0, "board": "CBSE", "dept_raw": "Swimming", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Boduppal", "subject": "Physical Education & Sports", "teacher": "Mr Santhosh", "role": "Teacher", "workload": 9.0, "board": "CBSE", "dept_raw": "Swimming", "branch": "Boduppal", "curriculum": "CBSE"}, {"campus": "Bachupally Cambridge", "subject": "Mathematics", "teacher": "Jisny Sunny", "role": "Teacher", "workload": 32.0, "board": "Cambridge", "dept_raw": "Math", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Mathematics", "teacher": "Kulakarni Vijaya shanthi", "role": "Teacher", "workload": 32.0, "board": "Cambridge", "dept_raw": "Math", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Mathematics", "teacher": "Ambati Prashanthi", "role": "Teacher", "workload": 31.0, "board": "Cambridge", "dept_raw": "Math", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Mathematics", "teacher": "Brahmani Parvataneni", "role": "Teacher", "workload": 31.0, "board": "Cambridge", "dept_raw": "Math", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Mathematics", "teacher": "Libina J", "role": "Teacher", "workload": 24.0, "board": "Cambridge", "dept_raw": "Math", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Mathematics", "teacher": "Anima Sahoo", "role": "Teacher", "workload": 23.0, "board": "Cambridge", "dept_raw": "Math", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Mathematics", "teacher": "Jaya somanini", "role": "Teacher", "workload": 24.0, "board": "Cambridge", "dept_raw": "Math", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Mathematics", "teacher": "Nazeerunnisa", "role": "Teacher", "workload": 31.0, "board": "Cambridge", "dept_raw": "Math", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Mathematics", "teacher": "Botla Susmitha", "role": "Teacher", "workload": 31.0, "board": "Cambridge", "dept_raw": "Math", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Mathematics", "teacher": "Pavani chaithanya koti", "role": "Teacher", "workload": 23.0, "board": "Cambridge", "dept_raw": "Math", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Mathematics", "teacher": "Kiranmai J", "role": "HOD", "workload": 20.0, "board": "Cambridge", "dept_raw": "Math", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Science", "teacher": "Sai Vasuki K", "role": "Teacher", "workload": 32.0, "board": "Cambridge", "dept_raw": "Science", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Science", "teacher": "Sirisha Ravuri", "role": "Teacher", "workload": 33.0, "board": "Cambridge", "dept_raw": "Science", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Science", "teacher": "Vellanki Poornima", "role": "Teacher", "workload": 31.0, "board": "Cambridge", "dept_raw": "Science", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Science", "teacher": "Naga lakshmi Tenneti", "role": "Teacher", "workload": 30.0, "board": "Cambridge", "dept_raw": "Science", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Science", "teacher": "Iswariya Selvamani", "role": "Teacher", "workload": 32.0, "board": "Cambridge", "dept_raw": "Science", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Science", "teacher": "Rizwana Zareen", "role": "Teacher", "workload": 28.0, "board": "Cambridge", "dept_raw": "Science", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Science", "teacher": "Soujanya Ramanuja Chilakhamarri", "role": "Teacher", "workload": 26.0, "board": "Cambridge", "dept_raw": "Science", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Science", "teacher": "Niharika Pandey", "role": "HOD", "workload": 20.0, "board": "Cambridge", "dept_raw": "Science", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Science", "teacher": "Challa Swetha", "role": "HM", "workload": 7.0, "board": "Cambridge", "dept_raw": "Science", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "English", "teacher": "Saraf Aruna", "role": "Teacher", "workload": 32.0, "board": "Cambridge", "dept_raw": "ENGLISH", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "English", "teacher": "Sumitha Mallick", "role": "Teacher", "workload": 26.0, "board": "Cambridge", "dept_raw": "ENGLISH", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "English", "teacher": "Nirmala Devi Gr", "role": "Coordinator", "workload": 12.0, "board": "Cambridge", "dept_raw": "ENGLISH", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "English", "teacher": "Meenu Murali", "role": "Teacher", "workload": 32.0, "board": "Cambridge", "dept_raw": "ENGLISH", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "English", "teacher": "Angshita chakraborti", "role": "Teacher", "workload": 32.0, "board": "Cambridge", "dept_raw": "ENGLISH", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "English", "teacher": "Reshma R Nair", "role": "Teacher", "workload": 28.0, "board": "Cambridge", "dept_raw": "ENGLISH", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "English", "teacher": "Shameem BEGUM", "role": "Teacher", "workload": 29.0, "board": "Cambridge", "dept_raw": "ENGLISH", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "English", "teacher": "Rubiya Shaik", "role": "Teacher", "workload": 23.0, "board": "Cambridge", "dept_raw": "ENGLISH", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "English", "teacher": "Racha Swetha", "role": "Coordinator", "workload": 14.0, "board": "Cambridge", "dept_raw": "ENGLISH", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "English", "teacher": "Thamsha Chowdarigari", "role": "HOD", "workload": 20.0, "board": "Cambridge", "dept_raw": "ENGLISH", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Social Science / Humanities", "teacher": "Nandhini ketireddy", "role": "Teacher", "workload": 32.0, "board": "Cambridge", "dept_raw": "Humanities   + GP", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Social Science / Humanities", "teacher": "Govinda Sai Poojitha", "role": "Teacher", "workload": 32.0, "board": "Cambridge", "dept_raw": "Humanities   + GP", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Social Science / Humanities", "teacher": "Godavarthi Aparna", "role": "Teacher", "workload": 28.0, "board": "Cambridge", "dept_raw": "Humanities   + GP", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Social Science / Humanities", "teacher": "Arundathi Milind Sindamkar", "role": "Teacher", "workload": 30.0, "board": "Cambridge", "dept_raw": "Humanities   + GP", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Social Science / Humanities", "teacher": "Sidagam Swarnalatha", "role": "Teacher", "workload": 30.0, "board": "Cambridge", "dept_raw": "Humanities   + GP", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Social Science / Humanities", "teacher": "Madhavi Malamreddy", "role": "Teacher", "workload": 31.0, "board": "Cambridge", "dept_raw": "Humanities   + GP", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Social Science / Humanities", "teacher": "Lavanya Ch", "role": "Teacher", "workload": 33.0, "board": "Cambridge", "dept_raw": "Humanities   + GP", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Social Science / Humanities", "teacher": "Tabitha Valli Koti", "role": "HOD", "workload": 0.0, "board": "Cambridge", "dept_raw": "Humanities   + GP", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "ICT / Computing", "teacher": "Indhira Priya Dharshini Chinthanippula", "role": "Teacher", "workload": 24.0, "board": "Cambridge", "dept_raw": "Computing", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "ICT / Computing", "teacher": "Sailaja Kurva", "role": "Teacher", "workload": 27.0, "board": "Cambridge", "dept_raw": "Computing", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "ICT / Computing", "teacher": "Paidipelli Soujanya", "role": "Teacher", "workload": 27.0, "board": "Cambridge", "dept_raw": "Computing", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "ICT / Computing", "teacher": "Podeti Chaitanya", "role": "Teacher", "workload": 29.0, "board": "Cambridge", "dept_raw": "Computing", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "ICT / Computing", "teacher": "Innamuri Chaitanya Lakshmi", "role": "HOD", "workload": 14.0, "board": "Cambridge", "dept_raw": "Computing", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Telugu", "teacher": "Methukupally Karuna", "role": "Teacher", "workload": 29.0, "board": "Cambridge", "dept_raw": "Telugu", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Telugu", "teacher": "Kanchi Laxmi Prasanna", "role": "Teacher", "workload": 29.0, "board": "Cambridge", "dept_raw": "Telugu", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Telugu", "teacher": "Bhulakshmidevi N", "role": "Teacher", "workload": 28.0, "board": "Cambridge", "dept_raw": "Telugu", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Telugu", "teacher": "Pilli Uma Surya Padma", "role": "Teacher", "workload": 28.0, "board": "Cambridge", "dept_raw": "Telugu", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Telugu", "teacher": "M.Swathi", "role": "Teacher", "workload": 26.0, "board": "Cambridge", "dept_raw": "Telugu", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Telugu", "teacher": "Sreedevi Vemireddy", "role": "HOD", "workload": 21.0, "board": "Cambridge", "dept_raw": "Telugu", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Hindi", "teacher": "Arpita saha modak", "role": "Teacher", "workload": 31.0, "board": "Cambridge", "dept_raw": "Hindi", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Hindi", "teacher": "Aastha Thakur", "role": "Teacher", "workload": 28.0, "board": "Cambridge", "dept_raw": "Hindi", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Hindi", "teacher": "Ujwala Dhabde", "role": "Teacher", "workload": 31.0, "board": "Cambridge", "dept_raw": "Hindi", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Hindi", "teacher": "Ankita Kumari", "role": "Teacher", "workload": 30.0, "board": "Cambridge", "dept_raw": "Hindi", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Hindi", "teacher": "Sonam sahu", "role": "Teacher", "workload": 30.0, "board": "Cambridge", "dept_raw": "Hindi", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Hindi", "teacher": "Ekta Tripathi", "role": "Teacher", "workload": 30.0, "board": "Cambridge", "dept_raw": "Hindi", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Hindi", "teacher": "Deeraja Mulukuri", "role": "HOD", "workload": 21.0, "board": "Cambridge", "dept_raw": "Hindi", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "French", "teacher": "Vadari Aparna", "role": "Teacher", "workload": 32.0, "board": "Cambridge", "dept_raw": "French", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "French", "teacher": "Abou Soualio Ouattara", "role": "Teacher", "workload": 28.0, "board": "Cambridge", "dept_raw": "French", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Homeroom / Primary", "teacher": "Anakapalli Suneetha", "role": "Teacher", "workload": 24.0, "board": "Cambridge", "dept_raw": "Grade 1 HRT", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Homeroom / Primary", "teacher": "Sarabjit Kaur", "role": "Teacher", "workload": 24.0, "board": "Cambridge", "dept_raw": "Grade 1 HRT", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Homeroom / Primary", "teacher": "Sangam Shanthi", "role": "Teacher", "workload": 24.0, "board": "Cambridge", "dept_raw": "Grade 1 HRT", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Homeroom / Primary", "teacher": "Ummenthala Samatha", "role": "Teacher", "workload": 24.0, "board": "Cambridge", "dept_raw": "Grade 1 HRT", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Homeroom / Primary", "teacher": "Sri Lalitha Chepuri", "role": "Teacher", "workload": 24.0, "board": "Cambridge", "dept_raw": "Grade 1 HRT", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Homeroom / Primary", "teacher": "Shireesha Aytha", "role": "Teacher", "workload": 24.0, "board": "Cambridge", "dept_raw": "Grade 1 HRT", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Homeroom / Primary", "teacher": "Nimmalapudi Naga Swetha", "role": "Teacher", "workload": 24.0, "board": "Cambridge", "dept_raw": "Grade 1 HRT", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Homeroom / Primary", "teacher": "Neeraja Subbayamma Mudigina", "role": "Teacher", "workload": 24.0, "board": "Cambridge", "dept_raw": "Grade 1 HRT", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Homeroom / Primary", "teacher": "Akurathi jyothi", "role": "Teacher", "workload": 33.0, "board": "Cambridge", "dept_raw": "EY HRT", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Homeroom / Primary", "teacher": "Sukanya Narra", "role": "Teacher", "workload": 33.0, "board": "Cambridge", "dept_raw": "EY HRT", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Homeroom / Primary", "teacher": "Gottam Tejaswi Reddy", "role": "Teacher", "workload": 33.0, "board": "Cambridge", "dept_raw": "EY HRT", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Homeroom / Primary", "teacher": "New Teacher", "role": "Teacher", "workload": 33.0, "board": "Cambridge", "dept_raw": "EY HRT", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Homeroom / Primary", "teacher": "Prasanna reddy Muduganti", "role": "Teacher", "workload": 33.0, "board": "Cambridge", "dept_raw": "EY HRT", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Homeroom / Primary", "teacher": "Seerapu Pavani", "role": "Teacher", "workload": 33.0, "board": "Cambridge", "dept_raw": "EY HRT", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Homeroom / Primary", "teacher": "Divya Mukund Reddy Gari", "role": "Teacher", "workload": 33.0, "board": "Cambridge", "dept_raw": "EY HRT", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Homeroom / Primary", "teacher": "Mekapothula Ramya", "role": "Coordinator", "workload": 13.0, "board": "Cambridge", "dept_raw": "EY HRT", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Dance", "teacher": "Abhirami Bharathan", "role": "Teacher", "workload": 29.0, "board": "Cambridge", "dept_raw": "Classical dance", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Dance", "teacher": "Emmadishetti Yuvaraju", "role": "Teacher", "workload": 29.0, "board": "Cambridge", "dept_raw": "Western dance", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Music", "teacher": "Sam", "role": "Teacher", "workload": 34.0, "board": "Cambridge", "dept_raw": "Western Music", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Music", "teacher": "Koteswararao Kummaragunta", "role": "Teacher", "workload": 33.0, "board": "Cambridge", "dept_raw": "classical music", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Arts", "teacher": "Deekonda Nagamani", "role": "Teacher", "workload": 33.0, "board": "Cambridge", "dept_raw": "Art & Craft", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Arts", "teacher": "Mari Pelly Ravi Kumar", "role": "Teacher", "workload": 30.0, "board": "Cambridge", "dept_raw": "Art & Craft", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Physical Education & Sports", "teacher": "Mr.Sayyad Iliyad", "role": "Teacher", "workload": 31.0, "board": "Cambridge", "dept_raw": "Swimming Coach  - Male", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Physical Education & Sports", "teacher": "Hijam Christina Devi", "role": "Teacher", "workload": 32.0, "board": "Cambridge", "dept_raw": "Swimming Coach   - female", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Physical Education & Sports", "teacher": "MR. Karunakar", "role": "HOD", "workload": 18.0, "board": "Cambridge", "dept_raw": "Sports HOD", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Physical Education & Sports", "teacher": "Laxman Korra", "role": "Teacher", "workload": 30.0, "board": "Cambridge", "dept_raw": "PET", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Physical Education & Sports", "teacher": "Udari Sridhar", "role": "Teacher", "workload": 30.0, "board": "Cambridge", "dept_raw": "Skating Coach", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Physical Education & Sports", "teacher": "Thumpilla Sampath", "role": "Teacher", "workload": 30.0, "board": "Cambridge", "dept_raw": "Basketball", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Physical Education & Sports", "teacher": "Laishubam Bidyasagar Singh", "role": "Teacher", "workload": 30.0, "board": "Cambridge", "dept_raw": "Taekwondo coach", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Physical Education & Sports", "teacher": "Priyanka Mishra", "role": "Teacher", "workload": 34.0, "board": "Cambridge", "dept_raw": "PET - Female", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Physical Education & Sports", "teacher": "Manaswi chowdary bodduluri", "role": "Teacher", "workload": 24.0, "board": "Cambridge", "dept_raw": "Yoga", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Physical Education & Sports", "teacher": "Sravani Devabaktuni", "role": "Teacher", "workload": 33.0, "board": "Cambridge", "dept_raw": "Yoga", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Physical Education & Sports", "teacher": "Rana Arjun Singh", "role": "Teacher", "workload": 24.0, "board": "Cambridge", "dept_raw": "Cricket Coach", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Library", "teacher": "K Aparna", "role": "Teacher", "workload": 32.0, "board": "Cambridge", "dept_raw": "Librarian", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Library", "teacher": "Divya Manasa Y", "role": "Teacher", "workload": 41.0, "board": "Cambridge", "dept_raw": "Librarian", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Science", "teacher": "Guduri Harika", "role": "Teacher", "workload": 0.0, "board": "Cambridge", "dept_raw": "Sci Lab   assistant", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally Cambridge", "subject": "Wellness", "teacher": "Triveni Varakala", "role": "Teacher", "workload": 21.0, "board": "Cambridge", "dept_raw": "Student Counsellor", "branch": "Bachupally", "curriculum": "Cambridge"}, {"campus": "Bachupally CBSE", "subject": "Mathematics", "teacher": "Vavilala Chiranjeevi", "role": "Teacher", "workload": 22.0, "board": "CBSE", "dept_raw": "Mathematics", "branch": "Bachupally", "curriculum": "CBSE"}, {"campus": "Bachupally CBSE", "subject": "Mathematics", "teacher": "C Bhavana", "role": "Teacher", "workload": 27.0, "board": "CBSE", "dept_raw": "Mathematics", "branch": "Bachupally", "curriculum": "CBSE"}, {"campus": "Bachupally CBSE", "subject": "Mathematics", "teacher": "Lakshmi Dokka", "role": "Teacher", "workload": 28.0, "board": "CBSE", "dept_raw": "Mathematics", "branch": "Bachupally", "curriculum": "CBSE"}, {"campus": "Bachupally CBSE", "subject": "Mathematics", "teacher": "Achitha Y", "role": "Teacher", "workload": 23.0, "board": "CBSE", "dept_raw": "Mathematics", "branch": "Bachupally", "curriculum": "CBSE"}, {"campus": "Bachupally CBSE", "subject": "Mathematics", "teacher": "Kiranmai J", "role": "Teacher", "workload": 5.0, "board": "CBSE", "dept_raw": "Mathematics", "branch": "Bachupally", "curriculum": "CBSE"}, {"campus": "Bachupally CBSE", "subject": "Science", "teacher": "Shruthi Priya", "role": "Teacher", "workload": 26.0, "board": "CBSE", "dept_raw": "Science", "branch": "Bachupally", "curriculum": "CBSE"}, {"campus": "Bachupally CBSE", "subject": "Science", "teacher": "B chandana priya", "role": "Teacher", "workload": 22.0, "board": "CBSE", "dept_raw": "Science", "branch": "Bachupally", "curriculum": "CBSE"}, {"campus": "Bachupally CBSE", "subject": "Science", "teacher": "Akshata R T", "role": "Teacher", "workload": 19.0, "board": "CBSE", "dept_raw": "Science", "branch": "Bachupally", "curriculum": "CBSE"}, {"campus": "Bachupally CBSE", "subject": "Science", "teacher": "Begari Karthik", "role": "Teacher", "workload": 23.0, "board": "CBSE", "dept_raw": "Science", "branch": "Bachupally", "curriculum": "CBSE"}, {"campus": "Bachupally CBSE", "subject": "English", "teacher": "Dokku Lakshmi Manjusha", "role": "Teacher", "workload": 22.0, "board": "CBSE", "dept_raw": "English / WW", "branch": "Bachupally", "curriculum": "CBSE"}, {"campus": "Bachupally CBSE", "subject": "English", "teacher": "Meenuga pravallika", "role": "Teacher", "workload": 22.0, "board": "CBSE", "dept_raw": "English / WW", "branch": "Bachupally", "curriculum": "CBSE"}, {"campus": "Bachupally CBSE", "subject": "English", "teacher": "Poornima Raman", "role": "Teacher", "workload": 15.0, "board": "CBSE", "dept_raw": "English / WW", "branch": "Bachupally", "curriculum": "CBSE"}, {"campus": "Bachupally CBSE", "subject": "English", "teacher": "Sowjanya Metta", "role": "Teacher", "workload": 22.0, "board": "CBSE", "dept_raw": "English / WW", "branch": "Bachupally", "curriculum": "CBSE"}, {"campus": "Bachupally CBSE", "subject": "Social Science / Humanities", "teacher": "Kosana Indrani", "role": "Teacher", "workload": 31.0, "board": "CBSE", "dept_raw": "SST /GK", "branch": "Bachupally", "curriculum": "CBSE"}, {"campus": "Bachupally CBSE", "subject": "Social Science / Humanities", "teacher": "G M Saritha", "role": "Teacher", "workload": 33.0, "board": "CBSE", "dept_raw": "SST /GK", "branch": "Bachupally", "curriculum": "CBSE"}, {"campus": "Bachupally CBSE", "subject": "Social Science / Humanities", "teacher": "Tabitha Valli.Koti", "role": "Teacher", "workload": 24.0, "board": "CBSE", "dept_raw": "SST /GK", "branch": "Bachupally", "curriculum": "CBSE"}, {"campus": "Bachupally CBSE", "subject": "Social Science / Humanities", "teacher": "Sudeshna Mairal", "role": "Teacher", "workload": 6.0, "board": "CBSE", "dept_raw": "SST /GK", "branch": "Bachupally", "curriculum": "CBSE"}, {"campus": "Bachupally CBSE", "subject": "ICT / Computing", "teacher": "Bonagiri Shilpa", "role": "Teacher", "workload": 23.0, "board": "CBSE", "dept_raw": "ICT", "branch": "Bachupally", "curriculum": "CBSE"}, {"campus": "Bachupally CBSE", "subject": "ICT / Computing", "teacher": "Md Ahmed", "role": "Teacher", "workload": 20.0, "board": "CBSE", "dept_raw": "ICT", "branch": "Bachupally", "curriculum": "CBSE"}, {"campus": "Bachupally CBSE", "subject": "Telugu", "teacher": "Nuvvula Renuka", "role": "Teacher", "workload": 28.0, "board": "CBSE", "dept_raw": "Telugu", "branch": "Bachupally", "curriculum": "CBSE"}, {"campus": "Bachupally CBSE", "subject": "Telugu", "teacher": "R Bhargavi", "role": "Teacher", "workload": 27.0, "board": "CBSE", "dept_raw": "Telugu", "branch": "Bachupally", "curriculum": "CBSE"}, {"campus": "Bachupally CBSE", "subject": "Telugu", "teacher": "Koraboina Sumithra", "role": "Teacher", "workload": 21.0, "board": "CBSE", "dept_raw": "Telugu", "branch": "Bachupally", "curriculum": "CBSE"}, {"campus": "Bachupally CBSE", "subject": "Hindi", "teacher": "Devakathe Manohar Rao", "role": "Teacher", "workload": 31.0, "board": "CBSE", "dept_raw": "Hindi", "branch": "Bachupally", "curriculum": "CBSE"}, {"campus": "Bachupally CBSE", "subject": "Hindi", "teacher": "Deepak Kumar Patel", "role": "Teacher", "workload": 30.0, "board": "CBSE", "dept_raw": "Hindi", "branch": "Bachupally", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Mathematics", "teacher": "Ms. Pravalika", "role": "Teacher", "workload": 25.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "English", "teacher": "Ms. Swathi", "role": "Teacher", "workload": 25.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "English", "teacher": "Ms. Lalitha", "role": "Teacher", "workload": 33.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "English", "teacher": "Ms. Nikitha", "role": "Teacher", "workload": 33.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "English", "teacher": "Ms. Padma Priya", "role": "Teacher", "workload": 30.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "English", "teacher": "Ms. Shakeena", "role": "Teacher", "workload": 29.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "English", "teacher": "Ms. Nahid", "role": "Teacher", "workload": 26.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "English", "teacher": "Ms. Susan Paul", "role": "Teacher", "workload": 30.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "English", "teacher": "Ms. Kiranmai", "role": "Teacher", "workload": 29.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "English", "teacher": "Ms. Niveditha", "role": "HOD", "workload": 22.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Telugu", "teacher": "Ms. Meenakshi", "role": "Teacher", "workload": 30.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Telugu", "teacher": "Ms. Aruna Jyothi", "role": "Teacher", "workload": 29.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Telugu", "teacher": "Ms. Sandhya", "role": "Teacher", "workload": 29.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Telugu", "teacher": "Ms. Jaya Lakshmi", "role": "Teacher", "workload": 30.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Telugu", "teacher": "Ms. Inya", "role": "Teacher", "workload": 30.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Telugu", "teacher": "Ms. Rajitha", "role": "HOD", "workload": 24.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Hindi", "teacher": "Ms. Priyanka Pan", "role": "Teacher", "workload": 10.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Hindi", "teacher": "Ms. Varuni", "role": "Teacher", "workload": 31.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Hindi", "teacher": "Ms. Shika", "role": "Teacher", "workload": 30.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Hindi", "teacher": "Ms. Megha", "role": "Teacher", "workload": 28.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Hindi", "teacher": "Ms. Padmalatha", "role": "Teacher", "workload": 30.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Hindi", "teacher": "Ms. Padmavathi", "role": "HOD", "workload": 24.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Mathematics", "teacher": "Ms. Jennifa", "role": "Teacher", "workload": 26.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Mathematics", "teacher": "Ms. Hima Bindu", "role": "Teacher", "workload": 25.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Mathematics", "teacher": "Ms. Mayuri", "role": "Teacher", "workload": 30.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Mathematics", "teacher": "Ms. Pavani", "role": "Teacher", "workload": 30.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Mathematics", "teacher": "Ms. Sindhu", "role": "Teacher", "workload": 29.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Mathematics", "teacher": "Ms. Jyothi", "role": "Teacher", "workload": 26.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Mathematics", "teacher": "Ms. Swarna", "role": "Teacher", "workload": 26.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Mathematics", "teacher": "Ms. Saritha", "role": "Teacher", "workload": 31.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Mathematics", "teacher": "Ms. Madhavi", "role": "Teacher", "workload": 27.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Mathematics", "teacher": "Mr. Vikram", "role": "HOD", "workload": 31.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Science", "teacher": "Ms. Jahnavi", "role": "Teacher", "workload": 26.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Science", "teacher": "Ms. Aamani", "role": "Teacher", "workload": 25.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Science", "teacher": "Ms. Rajya Lakshmi", "role": "Teacher", "workload": 31.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Science", "teacher": "Ms. Srivalli", "role": "Coordinator", "workload": 12.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Science", "teacher": "Ms. Uma Maheshwari", "role": "Teacher", "workload": 31.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Science", "teacher": "Ms. Ramya", "role": "Teacher", "workload": 30.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Science", "teacher": "Ms. Mriganky", "role": "Teacher", "workload": 26.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Science", "teacher": "Ms. Prasanna", "role": "Teacher", "workload": 28.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Science", "teacher": "Mr. Maruti Kiran", "role": "HOD", "workload": 30.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Science", "teacher": "Ms. Aswani", "role": "HOD", "workload": 22.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Social Science / Humanities", "teacher": "Ms. Rekha", "role": "Teacher", "workload": 29.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Social Science / Humanities", "teacher": "Ms. Vasavi", "role": "Teacher", "workload": 29.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Other", "teacher": "Ms. Vaishnavi", "role": "VP", "workload": 14.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Social Science / Humanities", "teacher": "Mr. Surya", "role": "HOD", "workload": 25.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "ICT / Computing", "teacher": "Ms. Sujithra", "role": "Teacher", "workload": 31.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "ICT / Computing", "teacher": "Ms. Madhavi", "role": "Exam Cell", "workload": 6.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "ICT / Computing", "teacher": "Ms. Tejaswi", "role": "Teacher", "workload": 26.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "ICT / Computing", "teacher": "Ms. Satya", "role": "HOD", "workload": 24.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Physical Education & Sports", "teacher": "Mr. Satish", "role": "Teacher", "workload": 16.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Physical Education & Sports", "teacher": "Ms. Vara Laxmi", "role": "Teacher", "workload": 21.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Physical Education & Sports", "teacher": "Mr. Vijay", "role": "Teacher", "workload": 30.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Physical Education & Sports", "teacher": "Ms. New Teacher", "role": "Teacher", "workload": 25.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Physical Education & Sports", "teacher": "Ms. Durga", "role": "Teacher", "workload": 24.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Physical Education & Sports", "teacher": "Mr. Bhanu", "role": "Teacher", "workload": 26.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Physical Education & Sports", "teacher": "Mr. Teja", "role": "Teacher", "workload": 24.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Music", "teacher": "Mr. David", "role": "Teacher", "workload": 23.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Dance", "teacher": "Mr. Prakash", "role": "Teacher", "workload": 23.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Other", "teacher": "Mr. Rajendar", "role": "Teacher", "workload": 18.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Other", "teacher": "Ms. Katyayani", "role": "Teacher", "workload": 14.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Other", "teacher": "Ms. Ashwini", "role": "Teacher", "workload": 19.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Other", "teacher": "Ms. Kavitha", "role": "Teacher", "workload": 22.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Wellness", "teacher": "Ms. Angela", "role": "Teacher", "workload": 11.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Other", "teacher": "Ms. Deepika", "role": "Teacher", "workload": 20.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Other", "teacher": "Ms. Swetha", "role": "Teacher", "workload": 36.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Other", "teacher": "Ms. Nikitha", "role": "Teacher", "workload": 36.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "ICT / Computing", "teacher": "Mr. John", "role": "Teacher", "workload": 31.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Other", "teacher": "Mr. Laxman", "role": "Teacher", "workload": 9.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Mathematics", "teacher": "Mr. Satish Kumar", "role": "Teacher", "workload": 8.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Science", "teacher": "Mr. Dinesh Babu", "role": "Teacher", "workload": 10.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Mathematics", "teacher": "Mr. Sudhershan Reddy", "role": "Teacher", "workload": 12.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Science", "teacher": "Mr. Mahesh", "role": "Teacher", "workload": 6.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Science", "teacher": "Mr. Rajath Sony", "role": "Teacher", "workload": 9.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Other", "teacher": "Mr. Pavan Kumar", "role": "Teacher", "workload": 5.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Other", "teacher": "Mr. Raghuram reddy", "role": "Teacher", "workload": 10.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Other", "teacher": "Ms. Madhuri", "role": "Teacher", "workload": 0.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Other", "teacher": "Ms. Naveena", "role": "Teacher", "workload": 0.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Keesara", "subject": "Other", "teacher": "Ms. Aswani", "role": "Teacher", "workload": 0.0, "board": "CBSE", "dept_raw": "", "branch": "Keesara", "curriculum": "CBSE"}, {"campus": "Pocharam CBSE", "subject": "Homeroom / Primary", "teacher": "Ms. P Tejaswi", "role": "Teacher", "workload": 26.0, "board": "CBSE", "dept_raw": "Grades 1 & 2", "branch": "Pocharam", "curriculum": "CBSE"}, {"campus": "Pocharam CBSE", "subject": "Homeroom / Primary", "teacher": "Ms. UMA MALINI", "role": "Teacher", "workload": 26.0, "board": "CBSE", "dept_raw": "Grades 1 & 2", "branch": "Pocharam", "curriculum": "CBSE"}, {"campus": "Pocharam CBSE", "subject": "Homeroom / Primary", "teacher": "Ms. Sai Priya", "role": "Teacher", "workload": 26.0, "board": "CBSE", "dept_raw": "Grades 1 & 2", "branch": "Pocharam", "curriculum": "CBSE"}, {"campus": "Pocharam CBSE", "subject": "Homeroom / Primary", "teacher": "Ms. AMINA", "role": "Teacher", "workload": 26.0, "board": "CBSE", "dept_raw": "Grades 1 & 2", "branch": "Pocharam", "curriculum": "CBSE"}, {"campus": "Pocharam CBSE", "subject": "Homeroom / Primary", "teacher": "Ms. SHEETAL", "role": "Teacher", "workload": 26.0, "board": "CBSE", "dept_raw": "Grades 1 & 2", "branch": "Pocharam", "curriculum": "CBSE"}, {"campus": "Pocharam CBSE", "subject": "English", "teacher": "Ms. P RAKSHANA OUNNATHYA", "role": "Teacher", "workload": 28.0, "board": "CBSE", "dept_raw": "English", "branch": "Pocharam", "curriculum": "CBSE"}, {"campus": "Pocharam CBSE", "subject": "English", "teacher": "Ms. GOUTHAMI", "role": "Teacher", "workload": 26.0, "board": "CBSE", "dept_raw": "English", "branch": "Pocharam", "curriculum": "CBSE"}, {"campus": "Pocharam CBSE", "subject": "English", "teacher": "Ms. KUSUMA LATHA KUMARAVELU", "role": "Teacher", "workload": 25.0, "board": "CBSE", "dept_raw": "English", "branch": "Pocharam", "curriculum": "CBSE"}, {"campus": "Pocharam CBSE", "subject": "English", "teacher": "Ms. NIVEDITA MISHRA", "role": "Teacher", "workload": 21.0, "board": "CBSE", "dept_raw": "English", "branch": "Pocharam", "curriculum": "CBSE"}, {"campus": "Pocharam CBSE", "subject": "Science", "teacher": "Ms. PAVITHRA", "role": "Teacher", "workload": 25.0, "board": "CBSE", "dept_raw": "Science", "branch": "Pocharam", "curriculum": "CBSE"}, {"campus": "Pocharam CBSE", "subject": "Science", "teacher": "Ms. RATNA VILASITHA . K", "role": "Teacher", "workload": 22.0, "board": "CBSE", "dept_raw": "Science", "branch": "Pocharam", "curriculum": "CBSE"}, {"campus": "Pocharam CBSE", "subject": "Science", "teacher": "Ms. DIVYA D G ACHAR", "role": "Teacher", "workload": 24.0, "board": "CBSE", "dept_raw": "Science", "branch": "Pocharam", "curriculum": "CBSE"}, {"campus": "Pocharam CBSE", "subject": "Science", "teacher": "Ms. Jyothsna", "role": "Teacher", "workload": 24.0, "board": "CBSE", "dept_raw": "Science", "branch": "Pocharam", "curriculum": "CBSE"}, {"campus": "Pocharam CBSE", "subject": "Science", "teacher": "Ms. LAVANYA RAY", "role": "Teacher", "workload": 28.0, "board": "CBSE", "dept_raw": "Social Science", "branch": "Pocharam", "curriculum": "CBSE"}, {"campus": "Pocharam CBSE", "subject": "Science", "teacher": "Ms. V. ROOPA DEVI", "role": "Teacher", "workload": 19.0, "board": "CBSE", "dept_raw": "Social Science", "branch": "Pocharam", "curriculum": "CBSE"}, {"campus": "Pocharam CBSE", "subject": "Science", "teacher": "Ms. Sheba Crystal", "role": "Teacher", "workload": 19.0, "board": "CBSE", "dept_raw": "Social Science", "branch": "Pocharam", "curriculum": "CBSE"}, {"campus": "Pocharam CBSE", "subject": "Mathematics", "teacher": "Ms. RADHIKA", "role": "Teacher", "workload": 25.0, "board": "CBSE", "dept_raw": "Mathematics", "branch": "Pocharam", "curriculum": "CBSE"}, {"campus": "Pocharam CBSE", "subject": "Mathematics", "teacher": "Ms. SAILAJA", "role": "Teacher", "workload": 25.0, "board": "CBSE", "dept_raw": "Mathematics", "branch": "Pocharam", "curriculum": "CBSE"}, {"campus": "Pocharam CBSE", "subject": "Mathematics", "teacher": "Ms. SRIVALLI JAYANTHI", "role": "Teacher", "workload": 6.0, "board": "CBSE", "dept_raw": "Mathematics", "branch": "Pocharam", "curriculum": "CBSE"}, {"campus": "Pocharam CBSE", "subject": "Mathematics", "teacher": "Mr. AGRAJ KUMAR", "role": "Teacher", "workload": 18.0, "board": "CBSE", "dept_raw": "Mathematics", "branch": "Pocharam", "curriculum": "CBSE"}, {"campus": "Pocharam CBSE", "subject": "Mathematics", "teacher": "Ms. PRERNA", "role": "Teacher", "workload": 12.0, "board": "CBSE", "dept_raw": "Mathematics", "branch": "Pocharam", "curriculum": "CBSE"}, {"campus": "Pocharam CBSE", "subject": "Telugu", "teacher": "NT_Primary_Telugu", "role": "Teacher", "workload": 27.0, "board": "CBSE", "dept_raw": "Telugu", "branch": "Pocharam", "curriculum": "CBSE"}, {"campus": "Pocharam CBSE", "subject": "Telugu", "teacher": "Ms. Divya", "role": "Teacher", "workload": 24.0, "board": "CBSE", "dept_raw": "Telugu", "branch": "Pocharam", "curriculum": "CBSE"}, {"campus": "Pocharam CBSE", "subject": "Telugu", "teacher": "Ms. SHIREESHA", "role": "Teacher", "workload": 24.0, "board": "CBSE", "dept_raw": "Telugu", "branch": "Pocharam", "curriculum": "CBSE"}, {"campus": "Pocharam CBSE", "subject": "Telugu", "teacher": "Ms. SUNITHA", "role": "Teacher", "workload": 14.0, "board": "CBSE", "dept_raw": "Telugu", "branch": "Pocharam", "curriculum": "CBSE"}, {"campus": "Pocharam CBSE", "subject": "Hindi", "teacher": "Ms. BANITA MOHANTY", "role": "Teacher", "workload": 27.0, "board": "CBSE", "dept_raw": "Hindi", "branch": "Pocharam", "curriculum": "CBSE"}, {"campus": "Pocharam CBSE", "subject": "Hindi", "teacher": "Ms. RANJANA MISHRA", "role": "Teacher", "workload": 24.0, "board": "CBSE", "dept_raw": "Hindi", "branch": "Pocharam", "curriculum": "CBSE"}, {"campus": "Pocharam CBSE", "subject": "Hindi", "teacher": "Ms. Bandana", "role": "Teacher", "workload": 24.0, "board": "CBSE", "dept_raw": "Hindi", "branch": "Pocharam", "curriculum": "CBSE"}, {"campus": "Pocharam CBSE", "subject": "Hindi", "teacher": "Ms. Nidhi", "role": "Teacher", "workload": 14.0, "board": "CBSE", "dept_raw": "Hindi", "branch": "Pocharam", "curriculum": "CBSE"}, {"campus": "Pocharam CBSE", "subject": "ICT / Computing", "teacher": "Ms. POORVI", "role": "Teacher", "workload": 22.0, "board": "CBSE", "dept_raw": "ICT", "branch": "Pocharam", "curriculum": "CBSE"}, {"campus": "Pocharam CBSE", "subject": "ICT / Computing", "teacher": "Ms. M. PAVANI", "role": "Teacher", "workload": 21.0, "board": "CBSE", "dept_raw": "ICT", "branch": "Pocharam", "curriculum": "CBSE"}, {"campus": "Pocharam CBSE", "subject": "ICT / Computing", "teacher": "Ms. Shravani P", "role": "Teacher", "workload": 16.0, "board": "CBSE", "dept_raw": "ICT", "branch": "Pocharam", "curriculum": "CBSE"}, {"campus": "Pocharam CBSE", "subject": "Wellness", "teacher": "Ms. Sanjana R V", "role": "Teacher", "workload": 17.0, "board": "CBSE", "dept_raw": "Counsellor", "branch": "Pocharam", "curriculum": "CBSE"}, {"campus": "Pocharam CBSE", "subject": "Arts", "teacher": "BHAVANA. B", "role": "Teacher", "workload": 22.0, "board": "CBSE", "dept_raw": "ART", "branch": "Pocharam", "curriculum": "CBSE"}, {"campus": "Pocharam CBSE", "subject": "Library", "teacher": "Ms. Vasavi", "role": "Teacher", "workload": 12.0, "board": "CBSE", "dept_raw": "Library", "branch": "Pocharam", "curriculum": "CBSE"}, {"campus": "Pocharam CBSE", "subject": "Dance", "teacher": "Ms. MANEESHA", "role": "Teacher", "workload": 22.0, "board": "CBSE", "dept_raw": "Dance", "branch": "Pocharam", "curriculum": "CBSE"}, {"campus": "Pocharam CBSE", "subject": "Dance", "teacher": "Ms. ASHWANI K", "role": "Teacher", "workload": 22.0, "board": "CBSE", "dept_raw": "Dance", "branch": "Pocharam", "curriculum": "CBSE"}, {"campus": "Pocharam CBSE", "subject": "Music", "teacher": "Teacher", "role": "Teacher", "workload": 22.0, "board": "CBSE", "dept_raw": "Music", "branch": "Pocharam", "curriculum": "CBSE"}, {"campus": "Pocharam CBSE", "subject": "Physical Education & Sports", "teacher": "Mr. RAGHU Tuesday Thursday", "role": "Teacher", "workload": 18.0, "board": "CBSE", "dept_raw": "PE", "branch": "Pocharam", "curriculum": "CBSE"}, {"campus": "Pocharam CBSE", "subject": "Physical Education & Sports", "teacher": "Mr. Narender Tuesday Thursday", "role": "Teacher", "workload": 16.0, "board": "CBSE", "dept_raw": "PE", "branch": "Pocharam", "curriculum": "CBSE"}, {"campus": "Pocharam CBSE", "subject": "Physical Education & Sports", "teacher": "Mr. DAYAKAR", "role": "Teacher", "workload": 18.0, "board": "CBSE", "dept_raw": "PE", "branch": "Pocharam", "curriculum": "CBSE"}, {"campus": "Pocharam CBSE", "subject": "Physical Education & Sports", "teacher": "Ms. Uma", "role": "Teacher", "workload": 16.0, "board": "CBSE", "dept_raw": "PE", "branch": "Pocharam", "curriculum": "CBSE"}, {"campus": "Pocharam CBSE", "subject": "Physical Education & Sports", "teacher": "First Mile Tuesday, Thursday Friday", "role": "Teacher", "workload": 5.0, "board": "CBSE", "dept_raw": "PE", "branch": "Pocharam", "curriculum": "CBSE"}, {"campus": "Pocharam CBSE", "subject": "ICT / Computing", "teacher": "COGNO SPACE Wed, Thurs, Fri", "role": "Teacher", "workload": 12.0, "board": "CBSE", "dept_raw": "Cognospace", "branch": "Pocharam", "curriculum": "CBSE"}, {"campus": "Pocharam CBSE", "subject": "Co-curricular", "teacher": "SCOUT GUIDE", "role": "Teacher", "workload": 8.0, "board": "CBSE", "dept_raw": "SCOUT AND GUIDE", "branch": "Pocharam", "curriculum": "CBSE"}, {"campus": "Pocharam Cambridge", "subject": "English", "teacher": "DIVYA NAIR", "role": "Teacher", "workload": 16.0, "board": "Cambridge", "dept_raw": "ENGLISH", "branch": "Pocharam", "curriculum": "Cambridge"}, {"campus": "Pocharam Cambridge", "subject": "English", "teacher": "DEEPAL", "role": "Teacher", "workload": 23.0, "board": "Cambridge", "dept_raw": "ENGLISH", "branch": "Pocharam", "curriculum": "Cambridge"}, {"campus": "Pocharam Cambridge", "subject": "English", "teacher": "REVATHI", "role": "Teacher", "workload": 35.0, "board": "Cambridge", "dept_raw": "ENGLISH", "branch": "Pocharam", "curriculum": "Cambridge"}, {"campus": "Pocharam Cambridge", "subject": "English", "teacher": "ASMA", "role": "Teacher", "workload": 35.0, "board": "Cambridge", "dept_raw": "ENGLISH", "branch": "Pocharam", "curriculum": "Cambridge"}, {"campus": "Pocharam Cambridge", "subject": "Mathematics", "teacher": "SHIVANJALI", "role": "Teacher", "workload": 31.0, "board": "Cambridge", "dept_raw": "MATHEMATICS", "branch": "Pocharam", "curriculum": "Cambridge"}, {"campus": "Pocharam Cambridge", "subject": "Mathematics", "teacher": "SUSHMA SAI", "role": "Teacher", "workload": 28.0, "board": "Cambridge", "dept_raw": "MATHEMATICS", "branch": "Pocharam", "curriculum": "Cambridge"}, {"campus": "Pocharam Cambridge", "subject": "Science", "teacher": "AMANI", "role": "Teacher", "workload": 26.0, "board": "Cambridge", "dept_raw": "SCIENCE & WELLNESS", "branch": "Pocharam", "curriculum": "Cambridge"}, {"campus": "Pocharam Cambridge", "subject": "Social Science / Humanities", "teacher": "SANCHAYITA", "role": "Teacher", "workload": 24.0, "board": "Cambridge", "dept_raw": "HUMANITIES & GP", "branch": "Pocharam", "curriculum": "Cambridge"}, {"campus": "Pocharam Cambridge", "subject": "Hindi", "teacher": "PERWAIZ", "role": "Teacher", "workload": 21.0, "board": "Cambridge", "dept_raw": "HINDI", "branch": "Pocharam", "curriculum": "Cambridge"}, {"campus": "Pocharam Cambridge", "subject": "Hindi", "teacher": "SUKESHANI", "role": "Teacher", "workload": 21.0, "board": "Cambridge", "dept_raw": "HINDI", "branch": "Pocharam", "curriculum": "Cambridge"}, {"campus": "Pocharam Cambridge", "subject": "Telugu", "teacher": "M LAVANYA", "role": "Teacher", "workload": 21.0, "board": "Cambridge", "dept_raw": "TELUGU", "branch": "Pocharam", "curriculum": "Cambridge"}, {"campus": "Pocharam Cambridge", "subject": "Telugu", "teacher": "NARMADA", "role": "Teacher", "workload": 21.0, "board": "Cambridge", "dept_raw": "TELUGU", "branch": "Pocharam", "curriculum": "Cambridge"}, {"campus": "Pocharam Cambridge", "subject": "French", "teacher": "ANILA", "role": "Teacher", "workload": 12.0, "board": "Cambridge", "dept_raw": "FRENCH", "branch": "Pocharam", "curriculum": "Cambridge"}, {"campus": "Pocharam Cambridge", "subject": "ICT / Computing", "teacher": "SNEHAL", "role": "Teacher", "workload": 23.0, "board": "Cambridge", "dept_raw": "ICT", "branch": "Pocharam", "curriculum": "Cambridge"}, {"campus": "Pocharam Cambridge", "subject": "Arts", "teacher": "SHARADA", "role": "Teacher", "workload": 14.0, "board": "Cambridge", "dept_raw": "ARTS", "branch": "Pocharam", "curriculum": "Cambridge"}, {"campus": "Pocharam Cambridge", "subject": "Dance", "teacher": "MANEESHA", "role": "Teacher", "workload": 9.0, "board": "Cambridge", "dept_raw": "DANCE", "branch": "Pocharam", "curriculum": "Cambridge"}, {"campus": "Pocharam Cambridge", "subject": "Music", "teacher": "KARUN", "role": "Teacher", "workload": 12.0, "board": "Cambridge", "dept_raw": "MUSIC", "branch": "Pocharam", "curriculum": "Cambridge"}, {"campus": "Pocharam Cambridge", "subject": "Physical Education & Sports", "teacher": "RAGHU", "role": "Teacher", "workload": 8.0, "board": "Cambridge", "dept_raw": "SKATING", "branch": "Pocharam", "curriculum": "Cambridge"}, {"campus": "Pocharam Cambridge", "subject": "Physical Education & Sports", "teacher": "UMA", "role": "Teacher", "workload": 6.0, "board": "Cambridge", "dept_raw": "PE", "branch": "Pocharam", "curriculum": "Cambridge"}, {"campus": "Gowdavalli", "subject": "Homeroom / Primary", "teacher": "Priti", "role": "HRT", "workload": 22.0, "board": "Mixed", "dept_raw": "G1 HRT CBSE", "branch": "Gowdavalli", "curriculum": "CBSE"}, {"campus": "Gowdavalli", "subject": "Homeroom / Primary", "teacher": "Divya Vani", "role": "HRT", "workload": 22.0, "board": "Mixed", "dept_raw": "G2 HRT CBSE", "branch": "Gowdavalli", "curriculum": "CBSE"}, {"campus": "Gowdavalli", "subject": "Homeroom / Primary", "teacher": "G Rama Devi", "role": "HRT", "workload": 21.0, "board": "Mixed", "dept_raw": "G3 HRT CBSE", "branch": "Gowdavalli", "curriculum": "CBSE"}, {"campus": "Gowdavalli", "subject": "Homeroom / Primary", "teacher": "Sworna Prava Palai", "role": "HRT", "workload": 16.0, "board": "Mixed", "dept_raw": "G4 HRT CBSE", "branch": "Gowdavalli", "curriculum": "CBSE"}, {"campus": "Gowdavalli", "subject": "Homeroom / Primary", "teacher": "Ankitha Tripathi", "role": "HRT", "workload": 21.0, "board": "Mixed", "dept_raw": "G5 HRT CBSE", "branch": "Gowdavalli", "curriculum": "CBSE"}, {"campus": "Gowdavalli", "subject": "Homeroom / Primary", "teacher": "Navya", "role": "HRT", "workload": 21.0, "board": "Mixed", "dept_raw": "G1 HRT CAIE", "branch": "Gowdavalli", "curriculum": "Cambridge"}, {"campus": "Gowdavalli", "subject": "Homeroom / Primary", "teacher": "Jasmin", "role": "HRT", "workload": 21.0, "board": "Mixed", "dept_raw": "G2 HRT CAIE", "branch": "Gowdavalli", "curriculum": "Cambridge"}, {"campus": "Gowdavalli", "subject": "Homeroom / Primary", "teacher": "Bhavani Preksha", "role": "HRT", "workload": 18.0, "board": "Mixed", "dept_raw": "G3 HRT CAIE", "branch": "Gowdavalli", "curriculum": "Cambridge"}, {"campus": "Gowdavalli", "subject": "Homeroom / Primary", "teacher": "Naga Jyothi", "role": "HRT", "workload": 18.0, "board": "Mixed", "dept_raw": "G4 HRT CAIE", "branch": "Gowdavalli", "curriculum": "Cambridge"}, {"campus": "Gowdavalli", "subject": "Homeroom / Primary", "teacher": "Kapila Choudary", "role": "HRT", "workload": 13.0, "board": "Mixed", "dept_raw": "G5 HRT CAIE", "branch": "Gowdavalli", "curriculum": "Cambridge"}, {"campus": "Gowdavalli", "subject": "French", "teacher": "Aditya Gupta", "role": "Teacher", "workload": 15.0, "board": "Mixed", "dept_raw": "French Teacher", "branch": "Gowdavalli", "curriculum": "Shared"}, {"campus": "Gowdavalli", "subject": "Telugu", "teacher": "Anulatha Rakthani", "role": "Teacher", "workload": 25.0, "board": "Mixed", "dept_raw": "Primary Telugu Teacher", "branch": "Gowdavalli", "curriculum": "Shared"}, {"campus": "Gowdavalli", "subject": "Hindi", "teacher": "Kavita Anand Bhushan", "role": "Teacher", "workload": 24.0, "board": "Mixed", "dept_raw": "Primary Hindi Teacher", "branch": "Gowdavalli", "curriculum": "Shared"}, {"campus": "Gowdavalli", "subject": "ICT / Computing", "teacher": "Rikhitha Sai", "role": "Teacher", "workload": 22.0, "board": "Mixed", "dept_raw": "ICT Teacher", "branch": "Gowdavalli", "curriculum": "Shared"}, {"campus": "Gowdavalli", "subject": "Physical Education & Sports", "teacher": "Neeraj Kumar", "role": "Teacher", "workload": 20.0, "board": "Mixed", "dept_raw": "PET", "branch": "Gowdavalli", "curriculum": "Shared"}, {"campus": "Gowdavalli", "subject": "Dance", "teacher": "Devraj", "role": "Teacher", "workload": 13.0, "board": "Mixed", "dept_raw": "Dance Teacher", "branch": "Gowdavalli", "curriculum": "Shared"}, {"campus": "Gowdavalli", "subject": "Music", "teacher": "Sam Daiva", "role": "Teacher", "workload": 13.0, "board": "Mixed", "dept_raw": "Music Teacher", "branch": "Gowdavalli", "curriculum": "Shared"}, {"campus": "Gowdavalli", "subject": "Arts", "teacher": "Mounika", "role": "Teacher", "workload": 13.0, "board": "Mixed", "dept_raw": "Art & Craft Teacher", "branch": "Gowdavalli", "curriculum": "Shared"}, {"campus": "Gowdavalli", "subject": "Physical Education & Sports", "teacher": "Charan Tej", "role": "Teacher", "workload": 11.0, "board": "Mixed", "dept_raw": "Taekwondo Teacher", "branch": "Gowdavalli", "curriculum": "Shared"}, {"campus": "Gowdavalli", "subject": "Physical Education & Sports", "teacher": "Farzan", "role": "Teacher", "workload": 10.0, "board": "Mixed", "dept_raw": "Skating Coach", "branch": "Gowdavalli", "curriculum": "Shared"}, {"campus": "Gowdavalli", "subject": "Telugu", "teacher": "Shankuri Kavya", "role": "Teacher", "workload": 20.0, "board": "Mixed", "dept_raw": "Floater Teacher (G2/1) + Telugu", "branch": "Gowdavalli", "curriculum": "Shared"}, {"campus": "Gowdavalli", "subject": "Social Science / Humanities", "teacher": "Bandari Shailaja", "role": "Teacher", "workload": 22.0, "board": "Mixed", "dept_raw": "Floater Teacher (G2/1) +Social", "branch": "Gowdavalli", "curriculum": "Shared"}, {"campus": "Gowdavalli", "subject": "English", "teacher": "Madhavi Das", "role": "Coordinator", "workload": 20.0, "board": "Mixed", "dept_raw": "Primary coordinator And English Teacher", "branch": "Gowdavalli", "curriculum": "Shared"}, {"campus": "Gowdavalli", "subject": "Homeroom / Primary", "teacher": "Rafna Jasmin", "role": "Teacher", "workload": 18.0, "board": "Mixed", "dept_raw": "Primary Teacher", "branch": "Gowdavalli", "curriculum": "Shared"}, {"campus": "Gowdavalli", "subject": "Hindi", "teacher": "Vandana Pandey", "role": "Teacher", "workload": 22.0, "board": "Mixed", "dept_raw": "Primary Hindi Teacher", "branch": "Gowdavalli", "curriculum": "Shared"}];
+
+/* ============ config ============ */
+const BANDS=[
+  {key:'under', label:'Under-utilised', short:'< 20',  test:w=>w<20,          cls:'b-under', color:'#0284c7'},
+  {key:'bal',   label:'Balanced',       short:'20–29', test:w=>w>=20&&w<30,   cls:'b-bal',   color:'#16a34a'},
+  {key:'full',  label:'Full load',      short:'30–35', test:w=>w>=30&&w<=35,  cls:'b-full',  color:'#f59e0b'},
+  {key:'over',  label:'Overloaded',     short:'36 +',  test:w=>w>35,          cls:'b-over',  color:'#ef4444'},
+];
+function bandOf(w){return BANDS.find(b=>b.test(w))||BANDS[0];}
+const CAMPUS_COLORS=['#2563eb','#0ea5e9','#6366f1','#06b6d4','#8b5cf6','#3b82f6','#0891b2'];
+const fmt=n=>n.toLocaleString('en-IN');
+const round1=n=>Math.round(n*10)/10;
+
+let charts={}, sortKey='workload', sortDir=-1, tSortKey='workload', tSortDir=-1, page=1, perPage=12;
+
+/* ============ theme ============ */
+const root=document.documentElement;
+function setTheme(t){
+  root.setAttribute('data-theme',t);
+  localStorage.setItem('wl-theme',t);
+  document.getElementById('themeIcon').textContent=t==='dark'?'light_mode':'dark_mode';
+  document.getElementById('themeLabel').textContent=t==='dark'?'Light':'Dark';
+  if(window._ready) buildCharts();
+}
+document.getElementById('themeBtn').onclick=()=>setTheme(root.getAttribute('data-theme')==='dark'?'light':'dark');
+setTheme('light'); /* default is always light; toggle still works within the session */
+
+function cssv(v){return getComputedStyle(root).getPropertyValue(v).trim();}
+function chartInk(){return root.getAttribute('data-theme')==='dark'?'#a9b7e0':'#41507a';}
+function chartGrid(){return root.getAttribute('data-theme')==='dark'?'rgba(150,175,235,.10)':'rgba(20,40,90,.08)';}
+
+/* ============ filters ============ */
+function uniq(k){return [...new Set(RAW.map(r=>r[k]).filter(Boolean))].sort((a,b)=>a.localeCompare(b));}
+function fill(id,vals){const s=document.getElementById(id);vals.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;s.appendChild(o);});}
+fill('fCampus',uniq('branch')); fill('fCurriculum',['CBSE','Cambridge']); fill('fSubject',uniq('subject')); fill('fRole',uniq('role'));
+BANDS.forEach(b=>{const o=document.createElement('option');o.value=b.key;o.textContent=b.label+' ('+b.short+')';document.getElementById('fBand').appendChild(o);});
+
+function getFilters(){return{
+  branch:fCampus.value,curriculum:fCurriculum.value,subject:fSubject.value,role:fRole.value,band:fBand.value,
+  q:fSearch.value.trim().toLowerCase()};}
+function applyFilters(){
+  const f=getFilters();
+  return RAW.filter(r=>
+    (!f.branch||r.branch===f.branch)&&
+    (!f.curriculum||r.curriculum===f.curriculum||r.curriculum==='Shared')&&
+    (!f.subject||r.subject===f.subject)&&
+    (!f.role||r.role===f.role)&&
+    (!f.band||bandOf(r.workload).key===f.band)&&
+    (!f.q||r.teacher.toLowerCase().includes(f.q)));
+}
+['fCampus','fCurriculum','fSubject','fRole','fBand'].forEach(id=>document.getElementById(id).onchange=render);
+document.getElementById('fSearch').oninput=debounce(render,180);
+document.getElementById('resetBtn').onclick=()=>{['fCampus','fCurriculum','fSubject','fRole','fBand'].forEach(id=>document.getElementById(id).value='');fSearch.value='';tSearch.value='';page=1;render();};
+function debounce(fn,ms){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms);};}
+
+/* ============ KPI ============ */
+function animateNum(el,to,dec=0){
+  const dur=900,st=performance.now(),from=0;
+  function step(now){const p=Math.min((now-st)/dur,1);const e=1-Math.pow(1-p,3);
+    el.textContent=(from+(to-from)*e).toFixed(dec).replace(/\B(?=(\d{3})+(?!\d))/g,',');
+    if(p<1)requestAnimationFrame(step);}
+  requestAnimationFrame(step);
+}
+function renderKPIs(rows){
+  const total=rows.length;
+  const periods=rows.reduce((s,r)=>s+r.workload,0);
+  const avg=total?periods/total:0;
+  const branches=new Set(rows.map(r=>r.branch)).size;
+  const over=rows.filter(r=>bandOf(r.workload).key==='over').length;
+  const under=rows.filter(r=>bandOf(r.workload).key==='under').length;
+  const cards=[
+    {ic:'groups',g:'g-blue',val:total,dec:0,lbl:'Total Teachers',trend:branches+' branch'+(branches!==1?'es':''),tc:'--brand',tbg:'var(--grad-soft)',ti:'apartment',
+      df:()=>rows,dt:'All teachers in view',ds:'Every record matching the current filters'},
+    {ic:'schedule',g:'g-cyan',val:periods,dec:0,lbl:'Total Periods / Week',trend:'load units',tc:'--cool',tbg:'var(--cool-bg)',ti:'functions',
+      df:()=>[...rows].sort((a,b)=>b.workload-a.workload),dt:'Total weekly periods',ds:'All teaching load in view, heaviest first'},
+    {ic:'speed',g:'g-indigo',val:avg,dec:1,lbl:'Avg Periods / Teacher',trend:'per head',tc:'--brand',tbg:'var(--grad-soft)',ti:'balance',
+      df:()=>[...rows].sort((a,b)=>b.workload-a.workload),dt:'Average periods per teacher',ds:'Everyone the average is drawn from'},
+    {ic:'apartment',g:'g-green',val:branches,dec:0,lbl:'Active Branches',trend:'network',tc:'--ok',tbg:'var(--ok-bg)',ti:'hub',
+      df:()=>rows,dt:'Active branches',ds:'Teachers across every branch in view'},
+    {ic:'local_fire_department',g:'g-rose',val:over,dec:0,lbl:'Overloaded (36+)',trend:pct(over,total),tc:'--hot',tbg:'var(--hot-bg)',ti:'warning',
+      df:()=>rows.filter(r=>bandOf(r.workload).key==='over'),dt:'Overloaded teachers (36+)',ds:'Candidates to relieve first'},
+    {ic:'battery_charging_full',g:'g-amber',val:under,dec:0,lbl:'Spare Capacity (<20)',trend:pct(under,total),tc:'--warn',tbg:'var(--warn-bg)',ti:'trending_down',
+      df:()=>rows.filter(r=>bandOf(r.workload).key==='under'),dt:'Spare capacity (under 20)',ds:'Teachers who could take on more'},
+  ];
+  const wrap=document.getElementById('kpis');wrap.innerHTML='';
+  cards.forEach((c,i)=>{
+    const d=document.createElement('div');d.className='kpi';
+    d.innerHTML=`<div class="top">
+        <div class="ic ${c.g}"><span class="msym">${c.ic}</span></div>
+        <div class="trend" style="color:var(${c.tc});background:${c.tbg}"><span class="msym">${c.ti}</span>${c.trend}</div>
+      </div>
+      <div class="val" data-to="${c.val}" data-dec="${c.dec}">0</div>
+      <div class="lbl">${c.lbl}</div>`;
+    d.onclick=()=>drill(c.df(),c.dt,c.ds);
+    wrap.appendChild(d);
+    setTimeout(()=>{d.classList.add('in');animateNum(d.querySelector('.val'),c.val,c.dec);},70*i);
+  });
+  const f=getFilters();
+  document.getElementById('kpiScope').textContent='· '+(f.branch||'all branches')+(f.curriculum?' · '+f.curriculum:'')+(f.subject?' / '+f.subject:'');
+}
+function pct(n,t){return t?Math.round(n/t*100)+'%':'0%';}
+
+/* ============ charts ============ */
+function destroy(){Object.values(charts).forEach(c=>c&&c.destroy());charts={};}
+Chart.defaults.font.family="'Inter',sans-serif";
+Chart.defaults.font.size=12;
+
+let LAST=[];
+function buildCharts(){
+  if(!LAST.length&&!RAW.length)return;
+  const rows=LAST;
+  destroy();
+  const ink=chartInk(),grid=chartGrid();
+
+  const clickCursor=e=>{e.native.target.style.cursor=e.chart.getElementsAtEventForMode(e.native,'nearest',{intersect:true},false).length?'pointer':'default';};
+
+  /* branch combo */
+  const camps=[...new Set(rows.map(r=>r.branch))];
+  const cCount=camps.map(c=>rows.filter(r=>r.branch===c).length);
+  const cAvg=camps.map(c=>{const a=rows.filter(r=>r.branch===c);return round1(a.reduce((s,r)=>s+r.workload,0)/(a.length||1));});
+  charts.campus=new Chart(campusChart,{data:{labels:camps,datasets:[
+    {type:'bar',label:'Teachers',data:cCount,backgroundColor:mkGrad('campusChart','#2563eb','#0ea5e9'),borderRadius:8,borderSkipped:false,yAxisID:'y',maxBarThickness:46,order:2},
+    {type:'line',label:'Avg periods',data:cAvg,borderColor:'#f59e0b',backgroundColor:'#f59e0b',borderWidth:3,tension:.4,pointRadius:5,pointHoverRadius:7,pointBackgroundColor:'#fff',pointBorderColor:'#f59e0b',pointBorderWidth:2,yAxisID:'y1',order:1}
+  ]},options:{...comboOpts(ink,grid),onHover:clickCursor,onClick:(e,els)=>{if(!els.length)return;const c=camps[els[0].index];drill(rows.filter(r=>r.branch===c),c+' branch',fmt(cCount[els[0].index])+' teachers · avg '+cAvg[els[0].index]+' periods');}}});
+
+  /* band doughnut */
+  const bandCounts=BANDS.map(b=>rows.filter(r=>bandOf(r.workload).key===b.key).length);
+  charts.band=new Chart(bandChart,{type:'doughnut',data:{labels:BANDS.map(b=>b.label),datasets:[{data:bandCounts,backgroundColor:BANDS.map(b=>b.color),borderWidth:0,hoverOffset:8,spacing:2}]},options:{...doughOpts(ink,'teachers'),onHover:clickCursor,onClick:(e,els)=>{if(!els.length)return;const b=BANDS[els[0].index];drill(rows.filter(r=>bandOf(r.workload).key===b.key),b.label+' ('+b.short+' periods)','Teachers in this capacity zone');}}});
+  legend('bandLegend',BANDS.map((b,i)=>({t:b.label+' · '+bandCounts[i],c:b.color})));
+
+  /* subject horizontal */
+  const subjAgg={};rows.forEach(r=>subjAgg[r.subject]=(subjAgg[r.subject]||0)+r.workload);
+  const subjArr=Object.entries(subjAgg).sort((a,b)=>b[1]-a[1]);
+  charts.subject=new Chart(subjectChart,{type:'bar',data:{labels:subjArr.map(s=>s[0]),datasets:[{label:'Periods',data:subjArr.map(s=>Math.round(s[1])),backgroundColor:mkGrad('subjectChart','#6366f1','#0ea5e9',true),borderRadius:7,borderSkipped:false,maxBarThickness:22}]},options:{...barHOpts(ink,grid),onHover:clickCursor,onClick:(e,els)=>{if(!els.length)return;const s=subjArr[els[0].index][0];drill(rows.filter(r=>r.subject===s),s+' department',fmt(Math.round(subjArr[els[0].index][1]))+' periods across the department');}}});
+
+  /* role doughnut */
+  const roleAgg={};rows.forEach(r=>roleAgg[r.role]=(roleAgg[r.role]||0)+1);
+  const roleArr=Object.entries(roleAgg).sort((a,b)=>b[1]-a[1]);
+  const roleCol=['#2563eb','#0ea5e9','#6366f1','#06b6d4','#8b5cf6','#f59e0b','#10b981','#f43f5e','#94a3b8'];
+  charts.role=new Chart(roleChart,{type:'doughnut',data:{labels:roleArr.map(r=>r[0]),datasets:[{data:roleArr.map(r=>r[1]),backgroundColor:roleCol,borderWidth:0,hoverOffset:8,spacing:2}]},options:{...doughOpts(ink,'staff'),onHover:clickCursor,onClick:(e,els)=>{if(!els.length)return;const ro=roleArr[els[0].index][0];drill(rows.filter(r=>r.role===ro),ro,fmt(roleArr[els[0].index][1])+' staff in this role');}}});
+  legend('roleLegend',roleArr.map((r,i)=>({t:r[0]+' · '+r[1],c:roleCol[i%roleCol.length]})));
+
+  /* branch workload health — 100% stacked by band */
+  const bhCamps=[...new Set(rows.map(r=>r.branch))];
+  const bhData=BANDS.map(b=>bhCamps.map(c=>{const a=rows.filter(r=>r.branch===c);return a.length?Math.round(a.filter(r=>bandOf(r.workload).key===b.key).length/a.length*100):0;}));
+  charts.branchHealth=new Chart(branchHealthChart,{type:'bar',data:{labels:bhCamps,datasets:BANDS.map((b,i)=>({label:b.label,data:bhData[i],backgroundColor:b.color,borderRadius:4,borderSkipped:false,maxBarThickness:30,stack:'h'}))},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,onHover:clickCursor,
+      onClick:(e,els)=>{if(!els.length)return;const c=bhCamps[els[0].index],b=BANDS[els[0].datasetIndex];const sub=rows.filter(r=>r.branch===c&&bandOf(r.workload).key===b.key);drill(sub,c+' · '+b.label,'Teachers in the '+b.label.toLowerCase()+' zone at this branch');},
+      plugins:{legend:{display:false},tooltip:{...baseTip,callbacks:{label:c=>' '+c.dataset.label+': '+c.raw+'%'}}},
+      scales:{x:{stacked:true,max:100,ticks:{color:ink,callback:v=>v+'%'},grid:{color:grid}},y:{stacked:true,ticks:{color:ink,font:{weight:'600',size:11.5}},grid:{display:false}}}}});
+  legend('branchHealthLegend',BANDS.map(b=>({t:b.label,c:b.color})));
+
+  renderCurScore(rows);
+}
+
+/* ============ CBSE vs Cambridge scorecard ============ */
+function renderCurScore(rows){
+  const el=document.getElementById('curScore');if(!el)return;
+  const defs=[{k:'CBSE',c:'#2563eb'},{k:'Cambridge',c:'#0ea5e9'}];
+  const html=defs.map(d=>{
+    const set=rows.filter(r=>r.curriculum===d.k||r.curriculum==='Shared');
+    if(!set.length)return `<div class="scol"><div class="sc-head" style="--c:${d.c}">${d.k}</div><p class="sc-empty">No teachers in view.</p></div>`;
+    const avg=round1(set.reduce((s,r)=>s+r.workload,0)/set.length);
+    const over=set.filter(r=>bandOf(r.workload).key==='over').length;
+    const under=set.filter(r=>bandOf(r.workload).key==='under').length;
+    return `<button class="scol" data-cur="${d.k}" style="--c:${d.c}">
+      <div class="sc-head">${d.k}<span class="msym">chevron_right</span></div>
+      <div class="sc-big">${fmt(set.length)}<small>teachers</small></div>
+      <div class="sc-rows">
+        <div><span>Avg periods</span><b>${avg}</b></div>
+        <div><span>Overloaded</span><b class="${over?'hot':''}">${over}</b></div>
+        <div><span>Spare capacity</span><b class="${under?'cool':''}">${under}</b></div>
+      </div></button>`;}).join('');
+  el.innerHTML=html;
+  el.querySelectorAll('.scol[data-cur]').forEach(btn=>btn.onclick=()=>{
+    const k=btn.dataset.cur;const set=rows.filter(r=>r.curriculum===k||r.curriculum==='Shared');
+    drill(set,k+' curriculum','Includes Gowdavalli teachers shared across both streams');});
+}
+function mkGrad(id,c1,c2,horiz){const ctx=document.getElementById(id).getContext('2d');const g=horiz?ctx.createLinearGradient(0,0,ctx.canvas.width,0):ctx.createLinearGradient(0,0,0,ctx.canvas.height);g.addColorStop(0,c1);g.addColorStop(1,c2);return g;}
+const baseTip={backgroundColor:'rgba(15,27,61,.94)',titleColor:'#fff',bodyColor:'#dbe4ff',padding:12,cornerRadius:12,borderColor:'rgba(120,150,220,.2)',borderWidth:1,titleFont:{family:'Manrope',weight:'700',size:13},bodyFont:{size:12.5},displayColors:true,boxPadding:4};
+function comboOpts(ink,grid){return{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+  plugins:{legend:{labels:{color:ink,usePointStyle:true,pointStyle:'rectRounded',padding:16,font:{weight:'600'}}},tooltip:baseTip},
+  scales:{x:{ticks:{color:ink,font:{weight:'600',size:11}},grid:{display:false}},
+    y:{position:'left',ticks:{color:ink,precision:0},grid:{color:grid},title:{display:true,text:'Teachers',color:ink,font:{weight:'600'}}},
+    y1:{position:'right',ticks:{color:'#f59e0b'},grid:{display:false},title:{display:true,text:'Avg periods',color:'#f59e0b',font:{weight:'600'}}}}};}
+function doughOpts(ink,unit){return{responsive:true,maintainAspectRatio:false,cutout:'64%',
+  plugins:{legend:{display:false},tooltip:{...baseTip,callbacks:{label:c=>' '+c.label+': '+c.raw+' '+unit+' ('+Math.round(c.raw/c.dataset.data.reduce((a,b)=>a+b,0)*100)+'%)'}}}};}
+function polarOpts(ink,grid){return{responsive:true,maintainAspectRatio:false,
+  plugins:{legend:{display:false},tooltip:baseTip},
+  scales:{r:{ticks:{display:false,backdropColor:'transparent'},grid:{color:grid},angleLines:{color:grid}}}};}
+function barHOpts(ink,grid){return{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+  plugins:{legend:{display:false},tooltip:{...baseTip,callbacks:{label:c=>' '+c.raw+' periods / week'}}},
+  scales:{x:{ticks:{color:ink},grid:{color:grid}},y:{ticks:{color:ink,font:{weight:'600',size:11.5}},grid:{display:false}}}};}
+function legend(id,items){const el=document.getElementById(id);el.innerHTML=items.map(i=>`<span class="li"><span class="sw" style="background:${i.c}"></span>${i.t}</span>`).join('');}
+
+/* ============ ranks & insights ============ */
+let TOP_LIST=[];
+function renderRanks(rows){
+  const sorted=[...rows].sort((a,b)=>b.workload-a.workload);
+  const max=sorted.length?sorted[0].workload:1;
+  TOP_LIST=sorted.slice(0,6);
+  const el=document.getElementById('topRank');
+  el.innerHTML=rankHTML(TOP_LIST,max);
+  el.querySelectorAll('.row[data-i]').forEach(row=>row.onclick=()=>{const r=TOP_LIST[+row.dataset.i];drill([r],r.teacher,r.branch+' · '+r.subject+' · '+r.role);});
+}
+function rankHTML(list,max){
+  if(!list.length)return '<p style="color:var(--ink-3);font-size:13px">No teachers match this view.</p>';
+  return list.map((r,i)=>`<div class="row" data-i="${i}">
+    <div class="pos">${i+1}</div>
+    <div class="info"><div class="n">${esc(r.teacher)}</div><div class="m">${esc(r.branch)} · ${esc(r.subject)}</div></div>
+    <div class="track"><i style="width:${Math.max(6,r.workload/max*100)}%"></i></div>
+    <div class="v">${round1(r.workload)}</div></div>`).join('');
+}
+function renderInsights(rows){
+  const el=document.getElementById('insights');
+  if(!rows.length){el.innerHTML='<p style="color:var(--ink-3);font-size:13px">No data for the current filters.</p>';return;}
+  const byBranch={};rows.forEach(r=>{(byBranch[r.branch]=byBranch[r.branch]||[]).push(r.workload);});
+  const stats=Object.entries(byBranch).map(([c,a])=>({c,avg:a.reduce((s,x)=>s+x,0)/a.length,n:a.length}));
+  const busiest=[...stats].sort((a,b)=>b.avg-a.avg)[0];
+  const lightest=[...stats].sort((a,b)=>a.avg-b.avg)[0];
+  const over=rows.filter(r=>bandOf(r.workload).key==='over');
+  const under=rows.filter(r=>bandOf(r.workload).key==='under');
+  const avg=rows.reduce((s,r)=>s+r.workload,0)/rows.length;
+  const balanced=rows.filter(r=>bandOf(r.workload).key==='bal'||bandOf(r.workload).key==='full').length;
+  const items=[];
+  items.push({ic:'local_fire_department',g:'g-rose',t:'Heaviest branch',
+    p:`<strong>${busiest.c}</strong> runs the highest average at <strong>${round1(busiest.avg)}</strong> periods across ${busiest.n} teachers.`});
+  if(over.length) items.push({ic:'warning',g:'g-amber',t:'Rebalance candidates',
+    p:`<strong>${over.length}</strong> teacher${over.length>1?'s are':' is'} above 35 periods. Consider redistributing to lighter loads.`});
+  if(under.length) items.push({ic:'battery_charging_full',g:'g-blue',t:'Spare capacity',
+    p:`<strong>${under.length}</strong> under 20 periods — roughly <strong>${Math.round(under.reduce((s,r)=>s+(24-r.workload),0))}</strong> periods of headroom before a 24-period target.`});
+  items.push({ic:'balance',g:'g-green',t:'Balance score',
+    p:`<strong>${Math.round(balanced/rows.length*100)}%</strong> of staff sit in the healthy 20–35 zone. Org average is <strong>${round1(avg)}</strong> periods.`});
+  el.innerHTML=items.map(i=>`<div class="insight"><div class="ic ${i.g}"><span class="msym">${i.ic}</span></div><div><b>${i.t}</b><p>${i.p}</p></div></div>`).join('');
+}
+
+/* ============ table ============ */
+function renderTable(rows){
+  const q=document.getElementById('tSearch').value.trim().toLowerCase();
+  let data=rows.filter(r=>!q||r.teacher.toLowerCase().includes(q)||r.subject.toLowerCase().includes(q)||r.branch.toLowerCase().includes(q)||r.curriculum.toLowerCase().includes(q));
+  data.sort((a,b)=>{
+    let A=tSortKey==='band'?bandVal(a.workload):a[tSortKey], B=tSortKey==='band'?bandVal(b.workload):b[tSortKey];
+    if(typeof A==='string')return A.localeCompare(B)*tSortDir;
+    return (A-B)*tSortDir;});
+  document.getElementById('tCount').textContent=fmt(data.length)+' record'+(data.length!==1?'s':'');
+  const pages=Math.max(1,Math.ceil(data.length/perPage));
+  if(page>pages)page=pages;
+  const slice=data.slice((page-1)*perPage,page*perPage);
+  const max=Math.max(...RAW.map(r=>r.workload),1);
+  document.getElementById('tbody').innerHTML=slice.map(r=>{
+    const b=bandOf(r.workload);
+    const curCls=r.curriculum==='CBSE'?'cur-cbse':(r.curriculum==='Cambridge'?'cur-camb':'cur-shared');
+    return `<tr>
+      <td class="name">${esc(r.teacher)}</td>
+      <td><span class="tag camp"><span class="msym">apartment</span>${esc(r.branch)}</span></td>
+      <td><span class="tag ${curCls}">${esc(r.curriculum)}</span></td>
+      <td>${esc(r.subject)}</td>
+      <td><span class="tag role">${esc(r.role)}</span></td>
+      <td><div class="wbar"><div class="track"><div class="fill" style="width:${r.workload/max*100}%;background:${b.color}"></div></div><b>${round1(r.workload)}</b></div></td>
+      <td><span class="band ${b.cls}">${b.label}</span></td>
+    </tr>`;}).join('') || `<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--ink-3)">No matching teachers.</td></tr>`;
+  renderPager(pages);
+}
+function bandVal(w){return BANDS.findIndex(b=>b.key===bandOf(w).key);}
+function renderPager(pages){
+  const el=document.getElementById('pager');
+  if(pages<=1){el.innerHTML='';return;}
+  let h=`<button ${page===1?'disabled':''} data-p="${page-1}"><span class="msym" style="font-size:18px;vertical-align:-4px">chevron_left</span></button>`;
+  const nums=pageNums(page,pages);
+  nums.forEach(n=>h+= n==='…'?`<button disabled>…</button>`:`<button class="${n===page?'active':''}" data-p="${n}">${n}</button>`);
+  h+=`<button ${page===pages?'disabled':''} data-p="${page+1}"><span class="msym" style="font-size:18px;vertical-align:-4px">chevron_right</span></button>`;
+  el.innerHTML=h;
+  el.querySelectorAll('button[data-p]').forEach(b=>b.onclick=()=>{page=+b.dataset.p;renderTable(LAST);document.getElementById('tbl').scrollIntoView({behavior:'smooth',block:'nearest'});});
+}
+function pageNums(c,t){const out=[];const add=n=>out.push(n);
+  if(t<=7){for(let i=1;i<=t;i++)add(i);return out;}
+  add(1);if(c>3)add('…');
+  for(let i=Math.max(2,c-1);i<=Math.min(t-1,c+1);i++)add(i);
+  if(c<t-2)add('…');add(t);return out;}
+document.getElementById('tSearch').oninput=debounce(()=>{page=1;renderTable(LAST);},160);
+document.querySelectorAll('#tbl thead th').forEach(th=>th.onclick=()=>{
+  const k=th.dataset.k;
+  if(tSortKey===k)tSortDir*=-1;else{tSortKey=k;tSortDir=(k==='workload'||k==='band')?-1:1;}
+  document.querySelectorAll('.sort-ic').forEach(s=>s.textContent='unfold_more');
+  th.querySelector('.sort-ic').textContent=tSortDir>0?'expand_less':'expand_more';
+  renderTable(LAST);
+});
+
+/* ============ drill-down modal ============ */
+const drillBack=document.getElementById('drillBack');
+function drill(records,title,sub){
+  records=records||[];
+  document.getElementById('drillTitle').textContent=title||'Details';
+  document.getElementById('drillSub').textContent=sub||'';
+  const n=records.length;
+  const periods=records.reduce((s,r)=>s+r.workload,0);
+  const avg=n?round1(periods/n):0;
+  const over=records.filter(r=>bandOf(r.workload).key==='over').length;
+  const under=records.filter(r=>bandOf(r.workload).key==='under').length;
+  document.getElementById('drillStats').innerHTML=[
+    {b:fmt(n),s:'teachers'},{b:fmt(Math.round(periods)),s:'total periods'},{b:avg,s:'avg / teacher'},
+    {b:over,s:'overloaded'},{b:under,s:'spare capacity'}
+  ].map(x=>`<div class="mstat"><b>${x.b}</b><span>${x.s}</span></div>`).join('');
+  const max=Math.max(...RAW.map(r=>r.workload),1);
+  const body=document.getElementById('drillBody');
+  const sorted=[...records].sort((a,b)=>b.workload-a.workload);
+  body.innerHTML=sorted.map(r=>{
+    const bd=bandOf(r.workload);
+    const curCls=r.curriculum==='CBSE'?'cur-cbse':(r.curriculum==='Cambridge'?'cur-camb':'cur-shared');
+    return `<tr>
+      <td class="name">${esc(r.teacher)}</td>
+      <td><span class="tag camp"><span class="msym">apartment</span>${esc(r.branch)}</span></td>
+      <td><span class="tag ${curCls}">${esc(r.curriculum)}</span></td>
+      <td>${esc(r.subject)}</td>
+      <td><span class="tag role">${esc(r.role)}</span></td>
+      <td><div class="wbar"><div class="track"><div class="fill" style="width:${r.workload/max*100}%;background:${bd.color}"></div></div><b>${round1(r.workload)}</b></div></td>
+      <td><span class="band ${bd.cls}">${bd.label}</span></td>
+    </tr>`;}).join('') || `<tr><td colspan="7" class="modal-empty">No teachers in this slice.</td></tr>`;
+  document.querySelector('.modal-body').scrollTop=0;
+  drillBack.classList.add('open');document.body.style.overflow='hidden';
+}
+function closeDrill(){drillBack.classList.remove('open');document.body.style.overflow='';}
+document.getElementById('drillClose').onclick=closeDrill;
+drillBack.addEventListener('click',e=>{if(e.target===drillBack)closeDrill();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&drillBack.classList.contains('open'))closeDrill();});
+
+/* ============ utils ============ */
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+/* ============ orchestrate ============ */
+function render(){
+  LAST=applyFilters();
+  renderKPIs(LAST);
+  buildCharts();
+  renderRanks(LAST);
+  renderInsights(LAST);
+  page=1;renderTable(LAST);
+}
+document.getElementById('printBtn').onclick=()=>window.print();
+document.getElementById('footStamp').textContent='Rendered '+new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})+' · '+RAW.length+' faculty records';
+
+/* reveal on scroll */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}}),{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+window._ready=true;
+render();
+</script>
+</body>
+</html>
