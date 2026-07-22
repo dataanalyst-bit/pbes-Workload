@@ -743,7 +743,7 @@ function drill(records,title,sub){
   ].map(x=>`<div class="mstat"><b>${x.b}</b><span>${x.s}</span></div>`).join('');
   const max=Math.max(...RAW.map(r=>r.workload),1);
   const body=document.getElementById('drillBody');
-  const sorted=[...records].sort((a,b)=>b.workload-a.workload);  
+  const sorted=[...records].sort((a,b)=>b.workload-a.workload);
   body.innerHTML=sorted.map(r=>{
     const bd=bandOf(r.workload);
     const curCls=r.curriculum==='CBSE'?'cur-cbse':(r.curriculum==='Cambridge'?'cur-camb':'cur-shared');
@@ -783,10 +783,8 @@ document.getElementById('footStamp').textContent='Rendered '+new Date().toLocale
 const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}}),{threshold:.12});
 document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 
-window._ready=true;
+window._ready=true;  
 render();
 </script>
 </body>
-</html>  
-
-
+</html>
